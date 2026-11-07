@@ -117,7 +117,7 @@ export function CreateSecretDialog({
 
   return (
     <Modal isOpen={open} onOpenChange={setOpen}>
-      <Button variant="ghost">
+      <Button variant="ghost" size="sm">
         <IconPlus className="text-accent" /> Create Secret
       </Button>
       <Modal.Backdrop>

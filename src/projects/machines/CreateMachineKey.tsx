@@ -130,8 +130,8 @@ export function CreateMachineKeyDialog({ project_id }: CreateMachineKeyProps) {
 
   return (
     <Modal isOpen={open} onOpenChange={setOpen}>
-      <Button variant="ghost">
-        <IconPlus />
+      <Button variant="ghost" size="sm">
+        <IconPlus className="text-accent" />
         Generate Key
       </Button>
       <Modal.Backdrop>

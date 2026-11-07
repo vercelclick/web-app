@@ -10,16 +10,20 @@ import { EnvironmentItem } from "./environment";
 
 export function ProjectHome() {
   const { project_id } = useParams<{ project_id: string }>();
-  const { data, isPending, isError } = useProjectQuery(project_id || "");
+  const { data, isPending, isError, isSuccess } = useProjectQuery(
+    project_id || "",
+  );
 
   return (
     <ProjectLayout
       links={[]}
-      description={data?.project.description}
       actions={
-        <Button variant="ghost">
-          <IconPlus /> New Environment
-        </Button>
+        isSuccess &&
+        data.contributor.role === "Admin" && (
+          <Button variant="ghost" size="sm">
+            <IconPlus className="text-accent" /> Create Environment
+          </Button>
+        )
       }
     >
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-x-6 gap-y-4 bg-surface rounded-xl py-6 px-4">
@@ -39,8 +43,8 @@ export function ProjectHome() {
           </>
         }
       >
-        <Button variant="ghost">
-          <IconPlus /> Add User
+        <Button variant="ghost" size="sm">
+          <IconPlus className="text-accent" /> Add User
         </Button>
       </SectionHeader>
 

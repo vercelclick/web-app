@@ -45,7 +45,7 @@ export function MachinePublicKeysList({
       <SectionHeader
         title={
           <>
-            <IconBotId className="size-6" /> Machines
+            <IconBotId className="size-6 text-accent" /> Machines
           </>
         }
       >

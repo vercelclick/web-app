@@ -20,6 +20,7 @@ import {
   useDecryptionParams,
 } from "@/auth/useAuthorization";
 import { useError } from "@/components";
+import { CopyIcon } from "@/components/CopyIcon";
 import {
   type ContributorPublicKey,
   type ContributorSecretValue,
@@ -225,6 +226,20 @@ export function SecretItem({
       return;
     }
 
+    // Set the previous value tag
+    setTagValues((values) => {
+      if (typeof values === "undefined") {
+        return undefined;
+      }
+
+      values.map((value) => {
+        if (value.tag === "previous") {
+          value.plain_value = latest_value ?? "";
+        }
+        return value;
+      });
+    });
+
     setLatestValue(updated_value);
     setUpdatedValue(undefined);
 
@@ -239,6 +254,7 @@ export function SecretItem({
     environment_query.refetch,
     machines_keys,
     updated_value,
+    latest_value,
   ]);
 
   const ref = useRef<HTMLDivElement | null>(null);
@@ -283,7 +299,7 @@ export function SecretItem({
               placeholder={locked ? "--ENCRYPTED-SECRET--" : "SECRET VALUE..."}
               value={updated_value ?? latest_value ?? ""}
               onChange={(evt) => setUpdatedValue(evt.currentTarget.value)}
-              className="field-sizing-content resize-none max-h-16 font-mono"
+              className="field-sizing-content resize-y overflow-x-auto max-h-16 font-mono"
             />
             <InputGroup.Suffix className="flex items-center gap-2">
               <Button
@@ -300,17 +316,9 @@ export function SecretItem({
                 <IconFingerprint /> Update
               </Button>
 
-              <IconCopyFilled
-                className="size-5 text-muted hover:text-accent cursor-pointer hidden group-hover:inline"
-                onClick={() =>
-                  navigator.clipboard
-                    .writeText(updated_value ?? latest_value ?? "")
-                    .then(() =>
-                      toast(`${definition.name} copied!`, {
-                        variant: "success",
-                      }),
-                    )
-                }
+              <CopyIcon
+                value={updated_value ?? latest_value ?? ""}
+                className="size-5 hidden group-hover:inline"
               />
             </InputGroup.Suffix>
           </InputGroup>
@@ -327,7 +335,7 @@ export function SecretItem({
             </InputGroup.Prefix>
             <InputGroup.TextArea
               disabled={error.is_pending}
-              className="field-sizing-content resize-none max-h-16"
+              className="field-sizing-content resize-y max-h-16"
               placeholder="Comments..."
               value={updated_comments ?? definition.comments}
               onChange={(evt) => setUpdatedComments(evt.currentTarget.value)}
@@ -355,6 +363,7 @@ export function SecretItem({
               <InputGroup.Prefix>
                 <IconTag className="text-muted size-4" />
               </InputGroup.Prefix>
+
               <InputGroup.TextArea
                 readOnly
                 value={value.plain_value}
@@ -363,15 +372,9 @@ export function SecretItem({
               <InputGroup.Suffix className="flex items-center gap-2">
                 {value.tag}
 
-                <IconCopyFilled
-                  className="size-5 text-muted hover:text-accent cursor-pointer hidden group-hover:inline"
-                  onClick={() =>
-                    navigator.clipboard.writeText(value.plain_value).then(() =>
-                      toast(`${value.name}@${value.tag} copied!`, {
-                        variant: "success",
-                      }),
-                    )
-                  }
+                <CopyIcon
+                  value={value.plain_value}
+                  className="size-5 hidden group-hover:inline"
                 />
               </InputGroup.Suffix>
             </InputGroup>

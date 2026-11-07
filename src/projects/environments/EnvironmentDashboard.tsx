@@ -37,15 +37,6 @@ export function EnvironmentDashboard() {
           />
         )
       }
-      description={
-        <Shimmer
-          active={query.isPending}
-          hidden={query.isError}
-          className="h-6"
-        >
-          {query.data?.environment.description}
-        </Shimmer>
-      }
     >
       {query.isError && (
         <ErrorDisplay

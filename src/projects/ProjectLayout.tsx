@@ -16,14 +16,12 @@ interface ProjectLayoutProps {
   children: ReactNode;
   links: HeaderItem[];
   actions?: ReactNode;
-  description?: ReactNode;
 }
 
 export function ProjectLayout({
   children,
   links,
   actions,
-  description,
 }: ProjectLayoutProps) {
   const { project_id } = useParams<{ project_id: string }>();
   const result = useProjectQuery(project_id || "");
@@ -45,7 +43,6 @@ export function ProjectLayout({
             },
             ...links,
           ]}
-          description={description}
         >
           {!!result.data && actions}
         </BreadCrumbPageHeader>
@@ -53,6 +50,7 @@ export function ProjectLayout({
 
       {result.isError && (
         <ErrorDisplay
+          className="mt-8"
           value={{
             title: "Error loading project",
             content: result.error.message,

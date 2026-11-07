@@ -1,5 +1,10 @@
-import { Breadcrumbs, Description } from "@heroui/react";
-import type { TablerIcon } from "@tabler/icons-react";
+import {
+  Breadcrumbs,
+  Button,
+  Description,
+  IconChevronDown,
+} from "@heroui/react";
+import { IconSettings, type TablerIcon } from "@tabler/icons-react";
 import clsx from "clsx";
 import type { ReactNode } from "react";
 import { Link } from "react-router";
@@ -61,7 +66,7 @@ export function SectionHeader({
 }
 
 export interface BreadCrumbHeaderProps
-  extends Omit<SectionHeaderProps, "title"> {
+  extends Omit<SectionHeaderProps, "title" | "description"> {
   items: HeaderItem[];
 }
 
@@ -74,29 +79,23 @@ export interface HeaderItem {
 export function BreadCrumbPageHeader({
   className,
   items,
-  description,
   children,
 }: BreadCrumbHeaderProps) {
   return (
-    <div
+    <nav
       className={clsx(
         "flex items-end mt-8 mb-4 border-b gap-4 py-2 ",
         className,
       )}
     >
-      <div className="flex flex-col gap-4 flex-wrap">
-        <Breadcrumbs className="flex-wrap">
-          {items.map((item) => (
-            <HeaderItemComponent key={item.to} {...item} />
-          ))}
-        </Breadcrumbs>
-        {description && (
-          <Description className="text-base">{description}</Description>
-        )}
-      </div>
+      <Breadcrumbs className="flex-wrap">
+        {items.map((item) => (
+          <HeaderItemComponent key={item.to} {...item} />
+        ))}
+      </Breadcrumbs>
       <div className="grow" />
       {children}
-    </div>
+    </nav>
   );
 }
 
