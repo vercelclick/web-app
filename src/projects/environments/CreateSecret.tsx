@@ -18,16 +18,13 @@ import { useAuthorizationParams } from "@/auth/useAuthorization";
 import { ErrorDisplay, useError } from "@/components";
 import { SimpleMono } from "@/components/command";
 import { SAFE_NAME_SCHEMA } from "@/constants";
-import type { ContributorPublicKey, MachinePublicKey } from "@/core";
 import { encrypt_secret } from "@/core";
 import { resolveApiRequest } from "@/utils";
-import { useEnvironmentQuery } from "./queries";
+import { fetchSecretTargets, useEnvironmentQuery } from "./queries";
 
 interface CreateSecretProps {
   project_id: string;
   env_name: string;
-  machines_keys: MachinePublicKey[];
-  contributors_keys: ContributorPublicKey[];
 }
 
 const new_secret_schema = z.object({
@@ -39,8 +36,6 @@ const new_secret_schema = z.object({
 export function CreateSecretDialog({
   env_name,
   project_id,
-  machines_keys,
-  contributors_keys,
 }: CreateSecretProps) {
   const [open, setOpen] = useState(false);
   const error = useError();
@@ -55,16 +50,21 @@ export function CreateSecretDialog({
     } satisfies z.infer<typeof new_secret_schema>,
     validators: { onChange: new_secret_schema, onMount: new_secret_schema },
     onSubmit: async ({ value, formApi }) => {
-      const params_op = await authParams("secret creation");
-      if (!params_op.ok) {
+      const [params_op, targets_op] = await Promise.all([
+        authParams("secret creation"),
+        error.catch("Error fetching secret target keys", () =>
+          fetchSecretTargets(project_id, env_name, value.name),
+        ),
+      ]);
+      if (!params_op.ok || !targets_op.ok) {
         return;
       }
 
       const encrypt_op = await error.catch("Error encrypting secret", () =>
         encrypt_secret({
           auth_request: params_op.result,
-          contributors_keys,
-          machines_keys,
+          project_id,
+          keys: targets_op.result,
           secret_value: value.value,
           env_name,
           tag_name: "latest",
@@ -82,11 +82,10 @@ export function CreateSecretDialog({
             method: "POST",
             body: JSON.stringify({
               auth_result: encrypt_op.result
-                .auth_response as PasskeyAuthorizationResult,
+                .auth_result as PasskeyAuthorizationResult,
               comments: value.comments,
               name: value.name,
-              machines_values: encrypt_op.result.machines_values,
-              contributors_values: encrypt_op.result.contributors_values,
+              encrypted_values: encrypt_op.result.encrypted_values,
             } satisfies CreateSecretRequest),
           },
         ),

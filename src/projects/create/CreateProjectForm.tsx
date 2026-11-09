@@ -5,7 +5,6 @@ import { useNavigate } from "react-router";
 import * as uuid from "uuid";
 import * as z from "zod";
 import type { CreateProjectRequest } from "@/api-types/CreateProjectRequest";
-import type { EncryptionAlgorithm } from "@/api-types/EncryptionAlgorithm";
 import type { PasskeyAuthorizationResult } from "@/api-types/PasskeyAuthorizationResult";
 import type { Project } from "@/api-types/Project";
 import { useAuthorization } from "@/auth/useAuthorization";
@@ -20,14 +19,9 @@ const createEnvironmentSchema = z.object({
   description: z.string(),
 });
 
-const ALGORITHMS: EncryptionAlgorithm[] = ["ECC", "KEM", "Hybrid"] as const;
-
 const create_project_schema = z.object({
   name: z.string().min(2),
   description: z.string(),
-  algorithm: z
-    .string()
-    .refine((value) => ALGORITHMS.includes(value as EncryptionAlgorithm)),
   environments: z.array(createEnvironmentSchema).refine((values) => {
     const names = values.map((env) => env.name);
 
@@ -56,7 +50,6 @@ export function useCreateProjectForm(path: string | null, error: ErrorHook) {
     defaultValues: {
       name: "",
       description: "",
-      algorithm: "ECC",
       environments: [
         {
           id: uuid.v7(),
@@ -80,9 +73,7 @@ export function useCreateProjectForm(path: string | null, error: ErrorHook) {
       onMount: create_project_schema,
     },
     onSubmitMeta: {} as { path: string | null },
-    onSubmit: async ({
-      value: { algorithm, description, environments, name },
-    }) => {
+    onSubmit: async ({ value: { description, environments, name } }) => {
       const auth_op = await authorize("project creation");
       if (!auth_op.ok) {
         return;
@@ -94,10 +85,9 @@ export function useCreateProjectForm(path: string | null, error: ErrorHook) {
           body: JSON.stringify({
             path,
             name,
-            algorithm: algorithm as EncryptionAlgorithm,
             description,
             environments,
-            auth_response: auth_op.result as PasskeyAuthorizationResult,
+            auth_result: auth_op.result as PasskeyAuthorizationResult,
           } satisfies CreateProjectRequest),
         }),
       );

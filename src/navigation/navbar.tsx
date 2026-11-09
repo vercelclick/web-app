@@ -1,14 +1,8 @@
-import { Button, Dropdown, IconChevronDown, Link } from "@heroui/react";
-import {
-  IconCloud,
-  IconCloudFilled,
-  IconDeviceLaptop,
-  IconExternalLink,
-} from "@tabler/icons-react";
+import { Dropdown, IconChevronDown, Link } from "@heroui/react";
+import { IconVault } from "@tabler/icons-react";
 import type { ReactNode } from "react";
 import { useSessionQuery } from "@/auth";
 import { DropdownItem, type DropdownItemProps, Logo } from "@/components";
-import { isCloud, isLocal, OPERATION_MODE } from "@/constants";
 import { ThemeToggle } from "@/shared/theme/theme-toggle";
 import { COMMUNITY_LINKS, RESOURCES_LINKS } from "./links";
 import { UserProfileButton } from "./profile";
@@ -23,11 +17,8 @@ export function Navbar() {
           <Link href="/" className="flex items-center space-x-2 no-underline">
             <Logo className="size-7" />
             <span className="text-2xl font-bold">Secretpass</span>
-            <span className="text-2xl font-bold text-accent">
-              {OPERATION_MODE}
-            </span>
-            {isLocal && <IconDeviceLaptop className="size-7 text-accent" />}
-            {isCloud && <IconCloud className="size-7 text-accent" />}
+            <span className="text-2xl font-bold text-accent">Vault</span>
+            <IconVault className="size-7 text-accent" />
           </Link>
 
           {!session.isSuccess && (
@@ -35,7 +26,6 @@ export function Navbar() {
               <LinkDropDown items={COMMUNITY_LINKS} label="Community" />
               <LinkDropDown items={RESOURCES_LINKS} label="Resources" />
 
-              <AlternativeButton />
               <div className="flex items-center gap-4 border-l pl-4">
                 <ThemeToggle />
               </div>
@@ -51,34 +41,6 @@ export function Navbar() {
         </div>
       </header>
     </nav>
-  );
-}
-
-function AlternativeButton() {
-  return (
-    <Link
-      href={
-        isLocal
-          ? "https://cloud.secretpass.cloud"
-          : "https://local.secretpass.cloud"
-      }
-      target="_blank"
-      className="no-underline"
-    >
-      <Button size="sm">
-        {isLocal && (
-          <>
-            <IconCloudFilled className="size-4" /> Cloud
-          </>
-        )}
-        {isCloud && (
-          <>
-            <IconDeviceLaptop className="size-4" /> Local
-          </>
-        )}
-        <IconExternalLink className="size-4" />
-      </Button>
-    </Link>
   );
 }
 

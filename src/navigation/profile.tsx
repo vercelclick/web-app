@@ -16,7 +16,6 @@ import { type MouseEventHandler, useCallback } from "react";
 import type { User } from "@/api-types/User";
 import { useLogoutMutation } from "@/auth/query";
 import { DropdownItem, useError } from "@/components";
-import { isCloud, isLocal } from "@/constants";
 import { COMMUNITY_LINKS, RESOURCES_LINKS } from "./links";
 
 export function UserProfileButton({ user }: { user: User }) {
@@ -45,25 +44,6 @@ export function UserProfileButton({ user }: { user: User }) {
       </Dropdown.Trigger>
       <Dropdown.Popover>
         <Dropdown.Menu>
-          {isLocal && (
-            <DropdownItem
-              is_external
-              href="https://cloud.secretpass.cloud"
-              Icon={IconCloudFilled}
-              label="Cloud"
-              capture="local-to-cloud-interest"
-            />
-          )}
-          {isCloud && (
-            <DropdownItem
-              is_external
-              href="https://local.secretpass.cloud"
-              Icon={IconDeviceLaptop}
-              label="Local"
-              capture="cloud-to-local-interest"
-            />
-          )}
-          <Separator />
           <Dropdown.Section>
             <Header>Community</Header>
             {COMMUNITY_LINKS.map((item) => (

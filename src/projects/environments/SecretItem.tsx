@@ -2,7 +2,6 @@ import { Button, InputGroup, Separator, toast } from "@heroui/react";
 import {
   IconAlignLeft,
   IconCircleCheck,
-  IconCopyFilled,
   IconFingerprint,
   IconKeyFilled,
   IconLock,
@@ -23,27 +22,19 @@ import { useError } from "@/components";
 import { CopyIcon } from "@/components/CopyIcon";
 import {
   type ContributorPublicKey,
-  type ContributorSecretValue,
   type DecryptedSecret,
   decrypt_secrets,
   encrypt_secret,
-  type MachinePublicKey,
+  type SecretValue,
 } from "@/core";
 import { useVisibleAction } from "@/hooks";
 import { resolveApiRequest } from "@/utils";
-import { useEnvironmentQuery } from "./queries";
-
-interface SecretItemProps extends SecretWithEncryptedValues {
-  machines_keys: MachinePublicKey[];
-  contributors_keys: ContributorPublicKey[];
-}
+import { fetchSecretTargets, useEnvironmentQuery } from "./queries";
 
 export function SecretItem({
   definition,
   contributor_values,
-  machines_keys,
-  contributors_keys,
-}: SecretItemProps) {
+}: SecretWithEncryptedValues) {
   const environment_query = useEnvironmentQuery(
     definition.project_id,
     definition.env_name,
@@ -84,7 +75,7 @@ export function SecretItem({
           auth_request: params_op.result,
           encrypted_secrets: contributor_values as [
             ContributorPublicKey,
-            ContributorSecretValue,
+            SecretValue,
           ][],
         }),
       { toast: true },
@@ -168,11 +159,17 @@ export function SecretItem({
     if (typeof updated_value === "undefined") {
       return;
     }
-    const challenge_op = await get_authorization_params(
-      "updating secret value",
-      { toast: true },
-    );
-    if (!challenge_op.ok) {
+    const [challenge_op, targets_op] = await Promise.all([
+      get_authorization_params("updating secret value", { toast: true }),
+      error.catch("Error fetching secret target keys", () =>
+        fetchSecretTargets(
+          definition.project_id,
+          definition.name,
+          definition.project_id,
+        ),
+      ),
+    ]);
+    if (!challenge_op.ok || !targets_op.ok) {
       return;
     }
 
@@ -181,12 +178,12 @@ export function SecretItem({
       () =>
         encrypt_secret({
           auth_request: challenge_op.result,
-          contributors_keys,
-          machines_keys,
+          keys: targets_op.result,
           env_name: definition.env_name,
           name: definition.name,
           secret_value: updated_value,
           tag_name: "latest",
+          project_id: definition.project_id,
         }),
       { toast: true },
     );
@@ -204,9 +201,8 @@ export function SecretItem({
             method: "PATCH",
             body: JSON.stringify({
               auth_result: encryption_op.result
-                .auth_response as PasskeyAuthorizationResult,
-              contributors_values: encryption_op.result.contributors_values,
-              machines_values: encryption_op.result.machines_values,
+                .auth_result as PasskeyAuthorizationResult,
+              encrypted_values: encryption_op.result.encrypted_values,
             } satisfies UpdateSecretValueRequest),
           },
         ),
@@ -232,7 +228,7 @@ export function SecretItem({
         return undefined;
       }
 
-      values.map((value) => {
+      return values.map((value) => {
         if (value.tag === "previous") {
           value.plain_value = latest_value ?? "";
         }
@@ -247,12 +243,10 @@ export function SecretItem({
   }, [
     error.catch,
     get_authorization_params,
-    contributors_keys,
     definition.env_name,
     definition.name,
     definition.project_id,
     environment_query.refetch,
-    machines_keys,
     updated_value,
     latest_value,
   ]);
@@ -289,7 +283,7 @@ export function SecretItem({
           <InputGroup
             isDisabled={locked}
             variant={locked ? "secondary" : "primary"}
-            className="group"
+            className="group relative"
           >
             <InputGroup.Prefix>
               <IconKeyFilled className="text-muted size-5" />
@@ -299,9 +293,11 @@ export function SecretItem({
               placeholder={locked ? "--ENCRYPTED-SECRET--" : "SECRET VALUE..."}
               value={updated_value ?? latest_value ?? ""}
               onChange={(evt) => setUpdatedValue(evt.currentTarget.value)}
-              className="field-sizing-content resize-y overflow-x-auto max-h-16 font-mono"
+              className={clsx(
+                "field-sizing-content overflow-x-auto resize-none max-h-24 font-mono",
+              )}
             />
-            <InputGroup.Suffix className="flex items-center gap-2">
+            <div className="absolute top-2 right-2 flex items-center gap-2">
               <Button
                 isDisabled={error.is_pending}
                 className={clsx(
@@ -320,7 +316,7 @@ export function SecretItem({
                 value={updated_value ?? latest_value ?? ""}
                 className="size-5 hidden group-hover:inline"
               />
-            </InputGroup.Suffix>
+            </div>
           </InputGroup>
 
           <InputGroup
@@ -335,7 +331,7 @@ export function SecretItem({
             </InputGroup.Prefix>
             <InputGroup.TextArea
               disabled={error.is_pending}
-              className="field-sizing-content resize-y max-h-16"
+              className={clsx("field-sizing-content resize-none max-h-24")}
               placeholder="Comments..."
               value={updated_comments ?? definition.comments}
               onChange={(evt) => setUpdatedComments(evt.currentTarget.value)}
@@ -359,7 +355,7 @@ export function SecretItem({
 
           {(tag_values?.length ?? 0) > 0 && <Separator variant="secondary" />}
           {tag_values?.map((value) => (
-            <InputGroup key={value.tag} className="group">
+            <InputGroup key={value.tag} className="group relative">
               <InputGroup.Prefix>
                 <IconTag className="text-muted size-4" />
               </InputGroup.Prefix>
@@ -367,16 +363,18 @@ export function SecretItem({
               <InputGroup.TextArea
                 readOnly
                 value={value.plain_value}
-                className="field-sizing-content resize-none max-h-16 text-sm font-mono text-muted"
+                className={clsx(
+                  "field-sizing-content resize-none max-h-24 text-sm font-mono text-muted",
+                )}
               />
-              <InputGroup.Suffix className="flex items-center gap-2">
-                {value.tag}
 
+              <div className="absolute top-2 right-2 flex items-center gap-2">
+                <span className="text-sm text-muted">{value.tag}</span>
                 <CopyIcon
                   value={value.plain_value}
                   className="size-5 hidden group-hover:inline"
                 />
-              </InputGroup.Suffix>
+              </div>
             </InputGroup>
           ))}
         </div>

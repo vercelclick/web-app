@@ -11,18 +11,15 @@ import {
 import { IconFingerprint } from "@tabler/icons-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useState } from "react";
-import type { CreateMachinePublicKeyRequest } from "@/api-types/CreateMachinePublicKeyRequest";
+import type { CreateAccessKeyRequest } from "@/api-types/CreateAccessKeyRequest";
 import type { GetEnvironmentResult } from "@/api-types/GetEnvironmentResult";
 import type { PasskeyAuthorizationResult } from "@/api-types/PasskeyAuthorizationResult";
+import type { SecretValue } from "@/api-types/SecretValue";
 import { useDecryptionParams } from "@/auth/useAuthorization";
 import { Alert, ErrorDisplay, Select, useError } from "@/components";
 import { SimpleMono } from "@/components/command";
-import { OPERATION_MODE } from "@/constants";
-import {
-  type ContributorPublicKey,
-  type ContributorSecretValue,
-  generate_machine_key,
-} from "@/core";
+import { ENVIRONMENT_ALL_ACCESS } from "@/constants";
+import { type ContributorPublicKey, generate_access_key } from "@/core";
 import { resolveApiRequest } from "@/utils";
 import { useProjectQuery } from "../queries";
 
@@ -30,7 +27,7 @@ export interface CreateMachineKeyProps {
   project_id: string;
 }
 
-export function CreateMachineKeyDialog({ project_id }: CreateMachineKeyProps) {
+export function CreateAccessKeyDialog({ project_id }: CreateMachineKeyProps) {
   const error = useError();
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
@@ -66,26 +63,21 @@ export function CreateMachineKeyDialog({ project_id }: CreateMachineKeyProps) {
       return;
     }
 
-    const encrypted_secrets: [ContributorPublicKey, ContributorSecretValue][] =
-      [];
+    const encrypted_secrets: [ContributorPublicKey, SecretValue][] = [];
     for (const env_result of env_ops.result) {
       for (const secret of env_result.secrets) {
         const secret_values = secret.contributor_values.filter(
           ([_, value]) => value.tag === "latest",
         );
         encrypted_secrets.push(
-          ...(secret_values as [
-            ContributorPublicKey,
-            ContributorSecretValue,
-          ][]),
+          ...(secret_values as [ContributorPublicKey, SecretValue][]),
         );
       }
     }
 
     const generate_op = await error.catch("Error generating private key", () =>
-      generate_machine_key({
+      generate_access_key({
         encrypted_secrets,
-        algorithm: project_query.data.project.algorithm,
         project_id: project_query.data.project.id,
         auth_request: params_op.result,
       }),
@@ -96,17 +88,22 @@ export function CreateMachineKeyDialog({ project_id }: CreateMachineKeyProps) {
     }
 
     const save_op = await error.catch("Error saving private key", () =>
-      resolveApiRequest(`/api/projects/${project_id}/machines`, {
+      resolveApiRequest(`/api/projects/${project_id}/access-keys`, {
         method: "POST",
         body: JSON.stringify({
-          auth_response: generate_op.result
-            .auth_response as PasskeyAuthorizationResult,
+          id: generate_op.result.public_key.target,
+          auth_result: generate_op.result
+            .auth_result as PasskeyAuthorizationResult,
           description,
           name,
-          environments,
-          machine_secrets: generate_op.result.machine_secrets,
-          public_key: generate_op.result.public_key,
-        } satisfies CreateMachinePublicKeyRequest),
+          access: environments.map((env_name) => ({
+            level: "ReadOnly",
+            name: env_name,
+            secrets: [ENVIRONMENT_ALL_ACCESS],
+          })),
+          encrypted_values: generate_op.result.encrypted_values,
+          public_key: generate_op.result.public_key.value,
+        } satisfies CreateAccessKeyRequest),
       }),
     );
 
@@ -132,7 +129,7 @@ export function CreateMachineKeyDialog({ project_id }: CreateMachineKeyProps) {
     <Modal isOpen={open} onOpenChange={setOpen}>
       <Button variant="ghost" size="sm">
         <IconPlus className="text-accent" />
-        Generate Key
+        Grant access
       </Button>
       <Modal.Backdrop>
         <Modal.Container>
@@ -220,11 +217,11 @@ export function CreateMachineKeyDialog({ project_id }: CreateMachineKeyProps) {
                       </p>
                       <SimpleMono
                         className="wrap-break-word"
-                        value={`spass ${OPERATION_MODE.toLowerCase()} run --private-key=${private_key} --env=${environments[0]} -- your command here`}
+                        value={`spass run --[local/cloud] --private-key=${private_key} --env=${environments[0]} -- your command here`}
                       />
                       <SimpleMono
                         className="wrap-break-word"
-                        value={`spass ${OPERATION_MODE.toLowerCase()} export --private-key=${private_key} --env=${environments[0]}{" "} --format=[json/dot-env]`}
+                        value={`spass export --[local/cloud] --private-key=${private_key} --env=${environments[0]}{" "} --format=[json/dot-env]`}
                       />
                     </div>
                   </Alert>

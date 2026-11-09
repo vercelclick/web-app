@@ -20,7 +20,6 @@ import type { StartLoginRequest } from "@/api-types/StartLoginRequest";
 import type { StartLoginResponse } from "@/api-types/StartLoginResponse";
 import { ErrorDisplay, useError } from "@/components";
 import { ConfirmationCodeInput } from "@/components/otp";
-import { OPERATION_MODE } from "@/constants";
 import { authorize_operation } from "@/core";
 import { resolveApiRequest } from "@/utils";
 import { SESSION_QUERY_KEY } from "./query";
@@ -121,14 +120,7 @@ export function SignInForm() {
         return;
       }
 
-      if (email_only || start_op.result.known_credentials.length === 0) {
-        if (!email_only) {
-          toast(
-            `No passkeys registered under ${OPERATION_MODE.toLowerCase()} application, create a passkey after successful signin`,
-            { variant: "warning" },
-          );
-        }
-
+      if (email_only) {
         setStarted(true);
       } else {
         loginWithPasskey(

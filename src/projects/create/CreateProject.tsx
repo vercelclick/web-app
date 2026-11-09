@@ -7,7 +7,6 @@ import { ErrorDisplay, useError } from "@/components";
 import { PageHeader } from "@/components/sections/header";
 import { useCreateProjectForm } from "./CreateProjectForm";
 import { NewProjectEnvironmentDefinitions } from "./EnvironmentDefinitions";
-import { NewProjectAlgorithm } from "./NewProjectAlgorithm";
 import { ProjectOverview } from "./NewProjectOverview";
 
 export function CreateProject() {
@@ -43,8 +42,6 @@ export function CreateProject() {
       </PageHeader>
 
       <ProjectOverview form={form} />
-
-      <NewProjectAlgorithm form={form} />
 
       <NewProjectEnvironmentDefinitions form={form} />
 

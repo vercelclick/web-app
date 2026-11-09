@@ -3,7 +3,7 @@ import { IconUsers } from "@tabler/icons-react";
 import { useParams } from "react-router";
 import { SectionHeader } from "@/components/sections/header";
 import { Shimmer } from "@/components/shimmer";
-import { MachinePublicKeysList } from "../machines/MachinesList";
+import { AccessKeysList } from "../access/AccessKeysList";
 import { ProjectLayout } from "../ProjectLayout";
 import { useProjectQuery } from "../queries";
 import { EnvironmentItem } from "./environment";
@@ -49,8 +49,8 @@ export function ProjectHome() {
       </SectionHeader>
 
       <Shimmer active={isPending} hidden={isError}>
-        <MachinePublicKeysList
-          public_keys={data?.machines ?? []}
+        <AccessKeysList
+          access_keys={data?.access_keys ?? []}
           project_id={project_id ?? ""}
         />
       </Shimmer>

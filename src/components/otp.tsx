@@ -42,11 +42,13 @@ export function ConfirmationCodeInput({
   owner,
   onConfirmation,
   operation,
+  name,
 }: {
   kind: ChallengeKind;
   owner: string;
   onConfirmation: (final_value: string) => void;
   operation?: string;
+  name?: string;
 }) {
   const error = useError();
   const [send_count, setSendCount] = useState(0);
@@ -62,7 +64,7 @@ export function ConfirmationCodeInput({
 
   const sendConfirmationCode = useCallback(async () => {
     const response = await error.catch("Error sending confirmation code", () =>
-      generateChallenge(kind, owner, { operation }),
+      generateChallenge(kind, owner, { operation, name }),
     );
     setSendCount((current) => current + 1);
     if (!response.ok) {
@@ -70,7 +72,7 @@ export function ConfirmationCodeInput({
     }
 
     setWaitTime(DEFAULT_WAIT_TIME);
-  }, [error.catch, kind, owner, operation]);
+  }, [error.catch, kind, owner, operation, name]);
 
   useEffect(() => {
     if (wait_time <= 0) {

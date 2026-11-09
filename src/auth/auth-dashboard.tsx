@@ -4,8 +4,6 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Activity, useState } from "react";
 import { Alert } from "@/components/alert";
 import { Shimmer } from "@/components/shimmer";
-import { isCloud, isLocal } from "@/constants";
-import { LocalOfflineInstructions } from "./offline-instructions";
 import { SESSION_QUERY_KEY } from "./query";
 import { SignInForm } from "./SignIn";
 import { SignupForm } from "./signup";
@@ -21,9 +19,8 @@ interface AuthDashboardProps {
 }
 
 const CONNECTED_TITLE = "Sign in or Create account";
-const DISCONNECTED_TITLE = isLocal
-  ? "Offline - Local service is unreachable"
-  : "Offline - Cloud connection refused";
+const DISCONNECTED_TITLE = "Offline - Cloud connection refused";
+// ? "Offline - Local service is unreachable"
 
 export function AuthDashboard({ isPending, disconnected }: AuthDashboardProps) {
   const queryClient = useQueryClient();
@@ -87,7 +84,7 @@ export function AuthDashboard({ isPending, disconnected }: AuthDashboardProps) {
               <SignupForm />
             </Activity>
 
-            {disconnected && isCloud && (
+            {disconnected && (
               <Alert
                 title="Please check your internet connection"
                 status="danger"
@@ -102,7 +99,6 @@ export function AuthDashboard({ isPending, disconnected }: AuthDashboardProps) {
                 </a>
               </Alert>
             )}
-            {disconnected && isLocal && <LocalOfflineInstructions />}
           </Shimmer>
         </Card.Content>
         {view === ActiveView.SignIn && (

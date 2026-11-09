@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { create } from "zustand";
-import { API_BASE_URL, CONNECTION_REFUSED_ERR } from "./constants";
+import { CLOUD_API_BASE_URL, CONNECTION_REFUSED_ERR } from "./constants";
 
 export type ComplexState<T extends object> = T & {
   readonly reset: () => void;
@@ -23,9 +23,11 @@ export function useComplexState<T extends object>(
   return useZustandState();
 }
 
+export type RequestParameters = RequestInit & { base_url?: string };
+
 export async function makeApiRequest<T = unknown>(
   path: string,
-  init?: RequestInit,
+  init?: RequestParameters,
 ) {
   const headers =
     init?.headers ??
@@ -34,12 +36,16 @@ export async function makeApiRequest<T = unknown>(
           "Content-Type": "application/json",
         }
       : undefined);
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    ...init,
-    headers,
-    credentials: "include",
-    mode: "cors",
-  });
+
+  const response = await fetch(
+    `${init?.base_url ?? CLOUD_API_BASE_URL}${path}`,
+    {
+      ...init,
+      headers,
+      credentials: "include",
+      mode: "cors",
+    },
+  );
 
   const text = await response.text();
   return {
@@ -55,7 +61,7 @@ export async function makeApiRequest<T = unknown>(
 
 export async function resolveApiRequest<T = unknown>(
   path: string,
-  init?: RequestInit,
+  init?: RequestParameters,
 ): Promise<T> {
   try {
     const response = await makeApiRequest<T>(path, init);

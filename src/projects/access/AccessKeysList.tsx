@@ -1,43 +1,39 @@
 import { Chip } from "@heroui/react";
 import { IconBotId, IconCode, IconKeyFilled } from "@tabler/icons-react";
 import TimeAgo from "react-timeago";
-import type { MachinePublicKey } from "@/api-types/MachinePublicKey";
+import type { AccessKey } from "@/api-types/AccessKey";
 import { Alert } from "@/components";
 import { SectionHeader } from "@/components/sections/header";
-import { CreateMachineKeyDialog } from "./CreateMachineKey";
+import { CreateAccessKeyDialog } from "./CreateAccessKey";
 
-export function MachinePublicKeyCard({
-  public_key,
-}: {
-  public_key: MachinePublicKey;
-}) {
+export function AccessKeyCard({ access_key }: { access_key: AccessKey }) {
   return (
     <div className="bg-background hover:bg-background-secondary p-4 flex gap-4 items-start rounded-xl">
       <IconKeyFilled className="h-6 w-auto text-muted" />
       <div className="flex flex-col grow gap-1">
-        <div className="text-lg">{public_key.name}</div>
+        <div className="text-lg">{access_key.name}</div>
         <div className="grow flex gap-4">
-          {public_key.environments.map((env_name) => (
-            <Chip size="sm" key={env_name}>
+          {access_key.access.map((item) => (
+            <Chip size="sm" key={item.name}>
               <IconCode className="h-3 w-auto" />
-              {env_name}
+              {item.name}
             </Chip>
           ))}
         </div>
         <div className="text-xs text-muted flex justify-between">
-          <span>{public_key.generated_by}</span>
-          <TimeAgo date={public_key.generated_on} />
+          <span>{access_key.generated_by}</span>
+          <TimeAgo date={access_key.generated_on} />
         </div>
       </div>
     </div>
   );
 }
 
-export function MachinePublicKeysList({
-  public_keys,
+export function AccessKeysList({
+  access_keys,
   project_id,
 }: {
-  public_keys: MachinePublicKey[];
+  access_keys: AccessKey[];
   project_id: string;
 }) {
   return (
@@ -45,25 +41,25 @@ export function MachinePublicKeysList({
       <SectionHeader
         title={
           <>
-            <IconBotId className="size-6 text-accent" /> Machines
+            <IconBotId className="size-6 text-accent" /> Machine Access
           </>
         }
       >
-        <CreateMachineKeyDialog project_id={project_id ?? ""} />
+        <CreateAccessKeyDialog project_id={project_id ?? ""} />
       </SectionHeader>
       <div className="bg-surface px-4 py-6 rounded-xl">
-        {public_keys.length === 0 && (
+        {access_keys.length === 0 && (
           <Alert
             status="warning"
             className="rounded-2xl bg-background shadow-none"
           >
-            You don't have any machine private keys at the moment, click
-            generate key to generate new keys
+            You don't have any access keys at the moment, click add access key
+            to generate new keys
           </Alert>
         )}
         <div className="grid gap-x-6 gap-y-4 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
-          {public_keys.map((public_key) => (
-            <MachinePublicKeyCard key={public_key.id} public_key={public_key} />
+          {access_keys.map((access_key) => (
+            <AccessKeyCard key={access_key.id} access_key={access_key} />
           ))}
         </div>
       </div>

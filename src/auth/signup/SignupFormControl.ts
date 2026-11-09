@@ -10,7 +10,7 @@ import type { PublicKeyGenerateResult } from "@/api-types/PublicKeyGenerateResul
 import type { SessionPackage } from "@/api-types/SessionPackage";
 import type { ErrorHook } from "@/components/error";
 import { generateChallenge } from "@/components/otp";
-import { create_passkey, generate_public_keys } from "@/core";
+import { create_passkey, generate_public_keys, generate_salt } from "@/core";
 import { resolveApiRequest } from "@/utils";
 import { SESSION_QUERY_KEY } from "../query";
 
@@ -108,6 +108,9 @@ export function useSignupForm(error: ErrorHook) {
         passkey.create_result,
       );
 
+      const user_salt = generate_salt();
+      const passkey_salt = generate_salt();
+
       const pubkey_op = await error.catch(
         "Error authorizing with passkey",
         () =>
@@ -115,8 +118,9 @@ export function useSignupForm(error: ErrorHook) {
             challenge: passkey.challenge,
             prf_configs: [
               {
-                user_id: profile.id,
                 cred_id: create_result.id,
+                user_salt,
+                passkey_salt,
               },
             ],
           }),
@@ -136,8 +140,10 @@ export function useSignupForm(error: ErrorHook) {
               id: profile.id,
               email: profile.email,
               name: profile.name,
+              user_salt,
               passkey_name: confirmation.passkey_name,
               confirmation_code: confirmation.confirmation_code,
+              passkey_salt,
               passkey_result: create_result,
               public_key_result: pubkey_op.result as PublicKeyGenerateResult,
             } satisfies CreateUserRequest),

@@ -54,7 +54,6 @@ export function useError() {
           };
         }
 
-        setValue({ title, content: String(error) });
         if (options?.capture) {
           analytics?.capture(options.capture, { success: true });
           analytics?.captureException(error, { source: options.capture });
@@ -65,6 +64,8 @@ export function useError() {
             variant: "danger",
             description: String(error),
           });
+        } else {
+          setValue({ title, content: String(error) });
         }
 
         return {

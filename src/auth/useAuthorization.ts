@@ -5,6 +5,7 @@ import {
   type AuthorizationRequest,
   authorize_operation,
   type DecryptionAuthorizationRequest,
+  type PrfDeriveConfig,
 } from "@/core";
 import { useSession } from "./session.provider";
 
@@ -41,12 +42,15 @@ export function useDecryptionParams(error: ErrorHook) {
 
   const prf_configs = useMemo(
     () =>
-      passkeys.map((pk) => ({
-        cred_id: pk.cred_id,
-        passkey_id: pk.cred_id,
-        user_id: user.id,
-      })),
-    [passkeys, user.id],
+      passkeys.map(
+        (pk) =>
+          ({
+            cred_id: pk.cred_id,
+            user_salt: user.key_salt,
+            passkey_salt: pk.key_salt,
+          }) satisfies PrfDeriveConfig,
+      ),
+    [passkeys, user.key_salt],
   );
 
   const compileParams = useCallback(

@@ -3,7 +3,6 @@ import { IconRefresh } from "@tabler/icons-react";
 import { Alert } from "@/components";
 import { PageHeader } from "@/components/sections/header";
 import { Shimmer } from "@/components/shimmer";
-import { isLocal } from "@/constants";
 import { useProjectsListQuery } from "@/projects";
 import { HelpTopicList } from "./help";
 import { PasskeysList } from "./PasskeysList";
@@ -45,33 +44,29 @@ export function HomeDashboard() {
         )}
       </Shimmer>
 
-      {isLocal && (
-        <Shimmer className="h-32" active={projects_list.isPending}>
-          {projects_list.isSuccess && (
-            <PendingProjectsList paths={projects_list.data.pending} />
-          )}
-        </Shimmer>
-      )}
+      <Shimmer className="h-32" active={projects_list.isPending}>
+        {projects_list.isSuccess && (
+          <PendingProjectsList paths={projects_list.data.pending} />
+        )}
+      </Shimmer>
 
       <Shimmer className="h-32" active={projects_list.isPending}>
         <PasskeysList />
       </Shimmer>
 
-      {isLocal && (
-        <Shimmer
-          className="h-32"
-          active={projects_list.isPending}
-          hidden={!projects_list.data?.inaccessible.length}
-        >
-          {projects_list.isSuccess && (
-            <InaccessibleProjectsList
-              projects={projects_list.data.inaccessible}
-            />
-          )}
-        </Shimmer>
-      )}
+      <Shimmer
+        className="h-32"
+        active={projects_list.isPending}
+        hidden={!projects_list.data?.inaccessible.length}
+      >
+        {projects_list.isSuccess && (
+          <InaccessibleProjectsList
+            projects={projects_list.data.inaccessible}
+          />
+        )}
+      </Shimmer>
 
-      {!projects_list.isPending && isLocal && (
+      {!projects_list.isPending && (
         <div className="my-8">
           <div className="flex gap-8 mb-6 items-center">
             <Separator className="flex-1" />

@@ -8,44 +8,30 @@ import type { ProjectPath } from "@/api-types/ProjectPath";
 import { Alert } from "@/components";
 import { SimpleMono } from "@/components/command";
 import { SectionHeader } from "@/components/sections/header";
-import { isCloud, isLocal } from "@/constants";
 
 export function ProjectsList({ projects }: { projects: ProjectListItem[] }) {
   return (
     <div>
       <SectionHeader title="Your projects">
-        {isCloud && (
-          <Link to="/new">
-            <Button variant={projects.length === 0 ? "primary" : "ghost"}>
-              <IconPlus
-                className={projects.length === 0 ? "" : "text-accent"}
-              />
-              Create a new project
-            </Button>
-          </Link>
-        )}
+        <Link to="/new">
+          <Button variant={projects.length === 0 ? "primary" : "ghost"}>
+            <IconPlus className={projects.length === 0 ? "" : "text-accent"} />
+            Create a new project
+          </Button>
+        </Link>
       </SectionHeader>
       <div className="bg-surface px-4 py-6 rounded-xl">
         {projects.length === 0 && (
           <Alert
             status="warning"
             className="rounded-2xl bg-background shadow-none"
+            title="Create, attach or request access to projects"
           >
-            You don't have access to any projects at the moment;
-            {isLocal && (
-              <>
-                please attach a project by running{" "}
-                <SimpleMono value="spass local attach" /> in the desired project
-                directory
-              </>
-            )}
-            {isCloud && (
-              <>
-                {" "}
-                please create a new project or request your admin to invite you
-                to an existing project.
-              </>
-            )}
+            You don't have access to any projects at the moment; you can attach
+            a project by running <SimpleMono value="spass local attach" /> in
+            the desired project directory, select create a new project to create
+            a cloud project. To access an existing project, request your admin
+            to invite you to an existing project.
           </Alert>
         )}
 
