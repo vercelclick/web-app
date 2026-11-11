@@ -3,13 +3,11 @@ import { IconLockAccess } from "@tabler/icons-react";
 import clsx from "clsx";
 import { useCallback } from "react";
 import TimeAgo from "react-timeago";
-import type { Passkey } from "@/api-types/Passkey";
-import type { User } from "@/api-types/User";
 import { useSession } from "@/auth";
 import { Alert, useError } from "@/components";
-import { generateChallenge } from "@/components/otp";
+import { generateWebauthnChallenge } from "@/components/otp";
 import { SectionHeader } from "@/components/sections/header";
-import { authorize_operation } from "@/core";
+import { authorize_operation, type Passkey, type User } from "@/core";
 import { CreatePasskeyButton } from "@/user/CreatePasskey";
 
 export function PasskeysList() {
@@ -57,7 +55,7 @@ function PasskeyItem({ passkey, user }: { passkey: Passkey; user: User }) {
   const onVerify = useCallback(async () => {
     const challenge_op = await error.catch(
       "Error creating challenge",
-      () => generateChallenge("PasskeyAuthorize", user.email),
+      () => generateWebauthnChallenge("PasskeyAuthorize", user.email),
       { toast: true },
     );
 

@@ -1,6 +1,6 @@
-import type { ProjectListItem } from "@/api-types/ProjectListItem";
 import { Alert } from "@/components";
 import { SectionHeader } from "@/components/sections/header";
+import type { ProjectListItem } from "@/core";
 import { ProjectCard } from "./list";
 
 export function InaccessibleProjectsList({

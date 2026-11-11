@@ -2,7 +2,7 @@ import { Description } from "@heroui/react";
 import { IconCode } from "@tabler/icons-react";
 import { Link } from "react-router";
 import TimeAgo from "react-timeago";
-import type { Environment } from "@/api-types/Environment";
+import type { Environment } from "@/core";
 
 export function EnvironmentItem({
   environment,

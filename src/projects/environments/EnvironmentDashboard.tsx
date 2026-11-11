@@ -1,8 +1,6 @@
 import { IconCode } from "@tabler/icons-react";
 import { useParams } from "react-router";
 import { Alert, ErrorDisplay } from "@/components";
-import { Shimmer } from "@/components/shimmer";
-import type { ContributorPublicKey, MachinePublicKey } from "@/core";
 import { ProjectLayout } from "../ProjectLayout";
 import { CreateSecretDialog } from "./CreateSecret";
 import { useEnvironmentQuery } from "./queries";
@@ -30,10 +28,6 @@ export function EnvironmentDashboard() {
           <CreateSecretDialog
             env_name={env_name ?? ""}
             project_id={project_id ?? ""}
-            machines_keys={query.data.machines_keys as MachinePublicKey[]}
-            contributors_keys={
-              query.data.contributors_keys as ContributorPublicKey[]
-            }
           />
         )
       }
@@ -56,14 +50,7 @@ export function EnvironmentDashboard() {
       {!!query.data?.secrets.length && (
         <div className="flex flex-col gap-y-6">
           {query.data.secrets.map((item) => (
-            <SecretItem
-              key={item.definition.name}
-              {...item}
-              machines_keys={query.data.machines_keys as MachinePublicKey[]}
-              contributors_keys={
-                query.data.contributors_keys as ContributorPublicKey[]
-              }
-            />
+            <SecretItem key={item.definition.name} {...item} />
           ))}
         </div>
       )}

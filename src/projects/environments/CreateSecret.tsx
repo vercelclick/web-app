@@ -12,13 +12,11 @@ import { IconFingerprint } from "@tabler/icons-react";
 import { useForm } from "@tanstack/react-form";
 import { type SubmitEventHandler, useCallback, useState } from "react";
 import * as z from "zod";
-import type { CreateSecretRequest } from "@/api-types/CreateSecretRequest";
-import type { PasskeyAuthorizationResult } from "@/api-types/PasskeyAuthorizationResult";
 import { useAuthorizationParams } from "@/auth/useAuthorization";
 import { ErrorDisplay, useError } from "@/components";
 import { SimpleMono } from "@/components/command";
 import { SAFE_NAME_SCHEMA } from "@/constants";
-import { encrypt_secret } from "@/core";
+import { type CreateSecretRequest, encrypt_secret } from "@/core";
 import { resolveApiRequest } from "@/utils";
 import { fetchSecretTargets, useEnvironmentQuery } from "./queries";
 
@@ -81,8 +79,7 @@ export function CreateSecretDialog({
           {
             method: "POST",
             body: JSON.stringify({
-              auth_result: encrypt_op.result
-                .auth_result as PasskeyAuthorizationResult,
+              auth_result: encrypt_op.result.auth_result,
               comments: value.comments,
               name: value.name,
               encrypted_values: encrypt_op.result.encrypted_values,

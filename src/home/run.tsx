@@ -10,9 +10,9 @@ import { SimpleMono } from "@/components/command";
 import { Shimmer } from "@/components/shimmer";
 import {
   type ContributorPublicKey,
-  type ContributorSecretValue,
   reencrypt_package,
-  type SimpleMachinePublicKey,
+  type SecretValue,
+  type TargetedPublicKey,
 } from "@/core";
 import { useProjectsListQuery } from "@/projects";
 import { useEnvironmentQuery } from "@/projects/environments/queries";
@@ -20,7 +20,7 @@ import { useProjectQuery } from "@/projects/queries";
 import { isSafari } from "@/utils";
 
 interface EncryptionDetails {
-  public_key: SimpleMachinePublicKey;
+  public_key: TargetedPublicKey;
   command: string | null;
 }
 
@@ -77,15 +77,12 @@ export function RunnerDialog() {
       return;
     }
 
-    const encrypted_secrets: [ContributorPublicKey, ContributorSecretValue][] =
-      [];
+    const encrypted_secrets: [ContributorPublicKey, SecretValue][] = [];
     for (const secret of environment.data.secrets) {
       const secret_values = secret.contributor_values.filter(
         ([_, value]) => value.tag === "latest",
       );
-      encrypted_secrets.push(
-        ...(secret_values as [ContributorPublicKey, ContributorSecretValue][]),
-      );
+      encrypted_secrets.push(...secret_values);
     }
 
     const reencrypt_op = await error.catch(
@@ -93,8 +90,7 @@ export function RunnerDialog() {
       () =>
         reencrypt_package({
           auth_request: params_op.result,
-          contributor_keys: [],
-          machine_keys: [details_query.data.public_key],
+          keys: [details_query.data.public_key],
           encrypted_secrets,
         }),
     );
@@ -104,7 +100,7 @@ export function RunnerDialog() {
     }
 
     const secrets_package: Record<string, string> = {};
-    for (const value of reencrypt_op.result.machines_values) {
+    for (const value of reencrypt_op.result.encrypted_values) {
       secrets_package[value.name] = value.encrypted_value;
     }
 

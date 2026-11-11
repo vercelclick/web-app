@@ -1,10 +1,10 @@
 import { createContext, type ReactNode, useContext, useMemo } from "react";
-import type { SessionPackage } from "@/api-types/SessionPackage";
 import { CONNECTION_REFUSED_ERR } from "@/constants";
+import type { AuthSession } from "@/core";
 import { AuthDashboard } from "./auth-dashboard";
 import { useSessionQuery } from "./query";
 
-const SessionContext = createContext<SessionPackage>(JSON.parse("null"));
+const SessionContext = createContext<AuthSession>(JSON.parse("null"));
 
 export function SessionProvider({ children }: { children: ReactNode }) {
   const session = useSessionQuery();

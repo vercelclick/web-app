@@ -1,9 +1,9 @@
 import { IconArrowRight, IconFolder } from "@tabler/icons-react";
 import { Activity, useMemo } from "react";
 import { createSearchParams, Link } from "react-router";
-import type { ProjectPath } from "@/api-types/ProjectPath";
 import { Alert } from "@/components";
 import { SectionHeader } from "@/components/sections/header";
+import type { ProjectPath } from "@/core";
 
 export function PendingProjectsList({ paths }: { paths: ProjectPath[] }) {
   return (

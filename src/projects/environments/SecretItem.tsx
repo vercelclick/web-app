@@ -10,10 +10,6 @@ import {
 } from "@tabler/icons-react";
 import clsx from "clsx";
 import { useCallback, useMemo, useRef, useState } from "react";
-import type { PasskeyAuthorizationResult } from "@/api-types/PasskeyAuthorizationResult";
-import type { SecretWithEncryptedValues } from "@/api-types/SecretWithEncryptedValues";
-import type { UpdateSecretRequest } from "@/api-types/UpdateSecretRequest";
-import type { UpdateSecretValueRequest } from "@/api-types/UpdateSecretValueRequest";
 import {
   useAuthorizationParams,
   useDecryptionParams,
@@ -26,6 +22,9 @@ import {
   decrypt_secrets,
   encrypt_secret,
   type SecretValue,
+  type SecretWithEncryptedValues,
+  type UpdateSecretRequest,
+  type UpdateSecretValueRequest,
 } from "@/core";
 import { useVisibleAction } from "@/hooks";
 import { resolveApiRequest } from "@/utils";
@@ -200,8 +199,7 @@ export function SecretItem({
           {
             method: "PATCH",
             body: JSON.stringify({
-              auth_result: encryption_op.result
-                .auth_result as PasskeyAuthorizationResult,
+              auth_result: encryption_op.result.auth_result,
               encrypted_values: encryption_op.result.encrypted_values,
             } satisfies UpdateSecretValueRequest),
           },

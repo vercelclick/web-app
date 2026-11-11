@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import type { GetEnvironmentResult } from "@/api-types/GetEnvironmentResult";
-import type { TargetedPublicKey } from "@/core";
+import type { GetEnvironmentResult, TargetedPublicKey } from "@/core";
 import { resolveApiRequest } from "@/utils";
 
 export function useEnvironmentQuery(project_id?: string, env_name?: string) {

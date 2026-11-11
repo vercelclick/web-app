@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from "react";
 import type { CatchOptions, ErrorHook } from "@/components/error";
-import { generateChallenge } from "@/components/otp";
+import { generateWebauthnChallenge } from "@/components/otp";
 import {
   type AuthorizationRequest,
   authorize_operation,
@@ -22,7 +22,7 @@ export function useAuthorizationParams(error: ErrorHook) {
       error.catch(
         `Error generating ${operation} challenge`,
         () =>
-          generateChallenge("PasskeyAuthorize", user.email).then(
+          generateWebauthnChallenge("PasskeyAuthorize", user.email).then(
             ({ challenge }) =>
               ({
                 challenge,
@@ -58,7 +58,7 @@ export function useDecryptionParams(error: ErrorHook) {
       error.catch(
         `Error generating ${operation} challenge`,
         () =>
-          generateChallenge("PasskeyAuthorize", user.email).then(
+          generateWebauthnChallenge("PasskeyAuthorize", user.email).then(
             ({ challenge }) =>
               ({
                 challenge,

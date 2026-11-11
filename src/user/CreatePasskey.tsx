@@ -12,15 +12,19 @@ import { useForm } from "@tanstack/react-form";
 import { useQueryClient } from "@tanstack/react-query";
 import { type SubmitEventHandler, useCallback, useState } from "react";
 import * as z from "zod";
-import type { CreatePasskeyRequest } from "@/api-types/CreatePasskeyRequest";
-import type { CreatePasskeyResponse } from "@/api-types/CreatePasskeyResponse";
-import type { PublicKeyGenerateResult } from "@/api-types/PublicKeyGenerateResult";
 import { SESSION_QUERY_KEY, useSession } from "@/auth";
 import { ErrorDisplay, useError } from "@/components";
-import { ConfirmationCodeInput, generateChallenge } from "@/components/otp";
 import {
+  ConfirmationCodeInput,
+  generateWebauthnChallenge,
+  sendEmailChallenge,
+} from "@/components/otp";
+import {
+  type AuthTokenResponse,
+  type CreatePasskeyRequest,
   create_passkey,
   generate_public_keys,
+  generate_salt,
   type PasskeyCreationResult,
 } from "@/core";
 import { resolveApiRequest } from "@/utils";
@@ -45,7 +49,7 @@ export function CreatePasskeyButton(props: ButtonProps) {
   const createPasskey = useCallback(async () => {
     const passkey_challenge_op = await error.catch(
       "Error starting passkey creation",
-      () => generateChallenge("PasskeyCreate", user.email),
+      () => generateWebauthnChallenge("PasskeyCreate", user.email),
     );
     if (!passkey_challenge_op.ok) {
       return;
@@ -65,14 +69,15 @@ export function CreatePasskeyButton(props: ButtonProps) {
       return;
     }
 
-    console.log("Sending an email challenge");
     // Ignore this result allowing the user to retry
-    const email_op = await error.catch("Error sending email challenge", () =>
-      generateChallenge("EmailAuthorize", user.email, {
-        operation: "attempted to create a new passkey",
-      }),
+    await error.catch(
+      "Error sending email challenge",
+      () =>
+        sendEmailChallenge("EmailAuthorize", user.email, {
+          operation: "attempted to create a new passkey",
+        }),
+      { toast: true },
     );
-    console.log("Email challenge result", email_op);
 
     setCreateResponse({
       create_response: create_result.result,
@@ -90,13 +95,16 @@ export function CreatePasskeyButton(props: ButtonProps) {
       challenge: string;
     },
     onSubmit: async (data) => {
+      const passkey_salt = generate_salt();
+
       const pubkey_op = await error.catch(
         "Error authorizing save passkey",
         () =>
           generate_public_keys({
             prf_configs: [
               {
-                user_id: user.id,
+                passkey_salt,
+                user_salt: user.key_salt,
                 cred_id: data.meta.create_response.id,
               },
             ],
@@ -109,13 +117,15 @@ export function CreatePasskeyButton(props: ButtonProps) {
       }
 
       const save_response = await error.catch("Error saving passkey", () =>
-        resolveApiRequest<CreatePasskeyResponse>("/api/users/passkeys/create", {
+        resolveApiRequest<AuthTokenResponse>("/api/users/passkeys/create", {
           method: "POST",
           body: JSON.stringify({
+            salt: passkey_salt,
             confirmation_code: data.value.confirmation_code,
-            create_response: data.meta.create_response,
+            create_result: data.meta.create_response,
             name: data.value.passkey_name,
-            public_key_result: pubkey_op.result as PublicKeyGenerateResult,
+            public_key: pubkey_op.result.public_key,
+            auth_result: pubkey_op.result.auth_result,
           } satisfies CreatePasskeyRequest),
         }),
       );

@@ -12,15 +12,18 @@ import { useQueryClient } from "@tanstack/react-query";
 import clsx from "clsx";
 import { type SubmitEventHandler, useCallback, useState } from "react";
 import * as z from "zod";
-import type { EmailLoginRequest } from "@/api-types/EmailLoginRequest";
-import type { PasskeyAuthorizationResult } from "@/api-types/PasskeyAuthorizationResult";
-import type { PasskeyLoginRequest } from "@/api-types/PasskeyLoginRequest";
-import type { SessionPackage } from "@/api-types/SessionPackage";
-import type { StartLoginRequest } from "@/api-types/StartLoginRequest";
-import type { StartLoginResponse } from "@/api-types/StartLoginResponse";
 import { ErrorDisplay, useError } from "@/components";
-import { ConfirmationCodeInput } from "@/components/otp";
-import { authorize_operation } from "@/core";
+import {
+  ConfirmationCodeInput,
+  generateWebauthnChallenge,
+  sendEmailChallenge,
+} from "@/components/otp";
+import {
+  type AuthSession,
+  authorize_operation,
+  type EmailLoginRequest,
+  type PasskeyLoginRequest,
+} from "@/core";
 import { resolveApiRequest } from "@/utils";
 import { SESSION_QUERY_KEY } from "./query";
 
@@ -37,13 +40,13 @@ export function SignInForm() {
   const [started, setStarted] = useState(false);
 
   const loginWithPasskey = useCallback(
-    async (email: string, challenge: string, known_credentials: string[]) => {
+    async (email: string, challenge: string) => {
       const auth_result = await error.catch(
         "Error authorizing with passkey",
         () =>
           authorize_operation({
-            allowed_credentials: known_credentials,
             challenge,
+            allowed_credentials: undefined,
           }),
       );
 
@@ -54,11 +57,11 @@ export function SignInForm() {
       const completion_result = await error.catch(
         "Error completing signing in process",
         () =>
-          resolveApiRequest<SessionPackage>("/api/auth/login/passkey", {
+          resolveApiRequest<AuthSession>("/api/auth/login/passkey", {
             method: "POST",
             body: JSON.stringify({
               owner: email,
-              auth_response: auth_result.result as PasskeyAuthorizationResult,
+              auth_response: auth_result.result,
             } satisfies PasskeyLoginRequest),
           }),
       );
@@ -87,7 +90,7 @@ export function SignInForm() {
         const completion_result = await error.catch(
           "Error completing login",
           () =>
-            resolveApiRequest<SessionPackage>("/api/auth/login/email", {
+            resolveApiRequest<AuthSession>("/api/auth/login/email", {
               method: "POST",
               body: JSON.stringify({
                 email_address,
@@ -106,29 +109,25 @@ export function SignInForm() {
         return;
       }
 
-      const start_op = await error.catch("Error starting sign in process", () =>
-        resolveApiRequest<StartLoginResponse>("/api/auth/login/start", {
-          body: JSON.stringify({
-            email_only: email_only,
-            email_address,
-          } satisfies StartLoginRequest),
-          method: "POST",
-        }),
-      );
-
-      if (!start_op.ok) {
+      if (email_only) {
+        await error.catch(
+          "Error sending signin code, if not received, please resend",
+          () => sendEmailChallenge("EmailSignIn", email_address),
+          { toast: true },
+        );
+        setStarted(true);
         return;
       }
 
-      if (email_only) {
-        setStarted(true);
-      } else {
-        loginWithPasskey(
-          email_address,
-          start_op.result.challenge,
-          start_op.result.known_credentials,
-        );
+      const challenge_op = await error.catch(
+        "Error starting sign in process",
+        () => generateWebauthnChallenge("PasskeySignIn", email_address),
+      );
+      if (!challenge_op.ok) {
+        return;
       }
+
+      loginWithPasskey(email_address, challenge_op.result.challenge);
     },
     onSubmitMeta: { email_only: false },
   });

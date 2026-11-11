@@ -8,29 +8,45 @@ import {
 } from "@heroui/react";
 import clsx from "clsx";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import type { ChallengeKind } from "@/api-types/ChallengeKind";
-import type { CheckChallengeRequest } from "@/api-types/CheckChallengeRequest";
-import type { CheckChallengeResult } from "@/api-types/CheckChallengeResult";
-import type { GenerateChallengeRequest } from "@/api-types/GenerateChallengeRequest";
-import type { GenerateChallengeResponse } from "@/api-types/GenerateChallengeResponse";
+import type {
+  ChallengeKind,
+  CheckChallengeRequest,
+  CheckChallengeResult,
+  EmailChallengeRequest,
+  WebauthnChallengeRequest,
+  WebauthnChallengeResponse,
+} from "@/core";
 import { resolveApiRequest } from "@/utils";
 import { ErrorDisplay, useError } from "./error";
 
 const CODE_PATTERN = /[^ABCDEFGHJKLMNPQRSTUVWXYZ23456789]/g;
 
-export async function generateChallenge(
+export async function generateWebauthnChallenge(
+  kind: ChallengeKind,
+  owner: string,
+) {
+  return resolveApiRequest<WebauthnChallengeResponse>("/api/auth/challenge", {
+    method: "POST",
+    body: JSON.stringify({
+      kind,
+      owner,
+    } satisfies WebauthnChallengeRequest),
+  });
+}
+
+export async function sendEmailChallenge(
   kind: ChallengeKind,
   owner: string,
   options?: { name?: string; operation?: string },
 ) {
-  return resolveApiRequest<GenerateChallengeResponse>("/api/auth/challenge", {
+  return resolveApiRequest<WebauthnChallengeResponse>("/api/auth/challenge", {
     method: "POST",
     body: JSON.stringify({
       kind,
       owner,
       name: options?.name,
       operation: options?.operation,
-    } satisfies GenerateChallengeRequest),
+    } satisfies EmailChallengeRequest),
   });
 }
 
@@ -64,7 +80,7 @@ export function ConfirmationCodeInput({
 
   const sendConfirmationCode = useCallback(async () => {
     const response = await error.catch("Error sending confirmation code", () =>
-      generateChallenge(kind, owner, { operation, name }),
+      sendEmailChallenge(kind, owner, { operation, name }),
     );
     setSendCount((current) => current + 1);
     if (!response.ok) {

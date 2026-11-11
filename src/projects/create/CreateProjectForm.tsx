@@ -4,12 +4,10 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router";
 import * as uuid from "uuid";
 import * as z from "zod";
-import type { CreateProjectRequest } from "@/api-types/CreateProjectRequest";
-import type { PasskeyAuthorizationResult } from "@/api-types/PasskeyAuthorizationResult";
-import type { Project } from "@/api-types/Project";
 import { useAuthorization } from "@/auth/useAuthorization";
 import type { ErrorHook } from "@/components/error";
 import { SAFE_NAME_SCHEMA } from "@/constants";
+import type { CreateProjectRequest, Project } from "@/core";
 import { resolveApiRequest } from "@/utils";
 import { PROJECT_LIST_QUERY_KEY } from "../queries";
 
@@ -87,7 +85,7 @@ export function useCreateProjectForm(path: string | null, error: ErrorHook) {
             name,
             description,
             environments,
-            auth_result: auth_op.result as PasskeyAuthorizationResult,
+            auth_result: auth_op.result,
           } satisfies CreateProjectRequest),
         }),
       );

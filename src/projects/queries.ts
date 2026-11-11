@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import type { GetProjectResult } from "@/api-types/GetProjectResult";
-import type { ListProjectsResult } from "@/api-types/ListProjectsResult";
+import type { GetProjectResult, ListProjectsResult } from "@/core";
 import { resolveApiRequest } from "@/utils";
 
 export const PROJECT_LIST_QUERY_KEY = ["projects_list"];

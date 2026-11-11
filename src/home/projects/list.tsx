@@ -2,12 +2,10 @@ import { Button, IconPlus } from "@heroui/react";
 import { IconFolder, IconShieldHalfFilled } from "@tabler/icons-react";
 import clsx from "clsx";
 import { Link } from "react-router";
-import type { Project } from "@/api-types/Project";
-import type { ProjectListItem } from "@/api-types/ProjectListItem";
-import type { ProjectPath } from "@/api-types/ProjectPath";
 import { Alert } from "@/components";
 import { SimpleMono } from "@/components/command";
 import { SectionHeader } from "@/components/sections/header";
+import type { Project, ProjectListItem, ProjectPath } from "@/core";
 
 export function ProjectsList({ projects }: { projects: ProjectListItem[] }) {
   return (

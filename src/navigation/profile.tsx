@@ -6,16 +6,11 @@ import {
   Label,
   Separator,
 } from "@heroui/react";
-import {
-  IconCloudFilled,
-  IconDeviceLaptop,
-  IconLogout2,
-  IconUserCircle,
-} from "@tabler/icons-react";
+import { IconLogout2, IconUserCircle } from "@tabler/icons-react";
 import { type MouseEventHandler, useCallback } from "react";
-import type { User } from "@/api-types/User";
 import { useLogoutMutation } from "@/auth/query";
 import { DropdownItem, useError } from "@/components";
+import type { User } from "@/core";
 import { COMMUNITY_LINKS, RESOURCES_LINKS } from "./links";
 
 export function UserProfileButton({ user }: { user: User }) {

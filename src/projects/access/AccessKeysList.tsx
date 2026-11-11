@@ -1,9 +1,9 @@
 import { Chip } from "@heroui/react";
 import { IconBotId, IconCode, IconKeyFilled } from "@tabler/icons-react";
 import TimeAgo from "react-timeago";
-import type { AccessKey } from "@/api-types/AccessKey";
 import { Alert } from "@/components";
 import { SectionHeader } from "@/components/sections/header";
+import type { AccessKey } from "@/core";
 import { CreateAccessKeyDialog } from "./CreateAccessKey";
 
 export function AccessKeyCard({ access_key }: { access_key: AccessKey }) {

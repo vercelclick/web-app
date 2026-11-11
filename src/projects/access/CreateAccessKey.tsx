@@ -5,21 +5,32 @@ import {
   Input,
   Label,
   Modal,
+  Radio,
+  RadioGroup,
   TextArea,
   TextField,
 } from "@heroui/react";
-import { IconFingerprint } from "@tabler/icons-react";
+import {
+  IconFingerprint,
+  IconKeyFilled,
+  IconShieldFilled,
+  type TablerIcon,
+} from "@tabler/icons-react";
 import { useQueryClient } from "@tanstack/react-query";
+import clsx from "clsx";
 import { useCallback, useState } from "react";
-import type { CreateAccessKeyRequest } from "@/api-types/CreateAccessKeyRequest";
-import type { GetEnvironmentResult } from "@/api-types/GetEnvironmentResult";
-import type { PasskeyAuthorizationResult } from "@/api-types/PasskeyAuthorizationResult";
-import type { SecretValue } from "@/api-types/SecretValue";
 import { useDecryptionParams } from "@/auth/useAuthorization";
 import { Alert, ErrorDisplay, Select, useError } from "@/components";
 import { SimpleMono } from "@/components/command";
 import { ENVIRONMENT_ALL_ACCESS } from "@/constants";
-import { type ContributorPublicKey, generate_access_key } from "@/core";
+import {
+  type ContributorPublicKey,
+  type CreateAccessKeyRequest,
+  type GetEnvironmentResult,
+  generate_access_key,
+  type PasskeyAuthorizationResult,
+  type SecretValue,
+} from "@/core";
 import { resolveApiRequest } from "@/utils";
 import { useProjectQuery } from "../queries";
 
@@ -31,14 +42,24 @@ export function CreateAccessKeyDialog({ project_id }: CreateMachineKeyProps) {
   const error = useError();
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
-  const [private_key, setPrivateKey] = useState<string | null>(null);
+  const [is_federated, setIsFederated] = useState(true);
+  const [generated_key, setGeneratedKey] = useState<string | null>(null);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [environments, setEnvironments] = useState<string[]>([]);
   const project_query = useProjectQuery(project_id);
   const get_params = useDecryptionParams(error);
 
-  const generateKey = useCallback(async () => {
+  const reset = useCallback(() => {
+    error.reset();
+    setIsFederated(true);
+    setGeneratedKey(null);
+    setName("");
+    setDescription("");
+    setEnvironments([]);
+  }, [error.reset]);
+
+  const generateStandardKey = useCallback(async () => {
     if (!project_query.isSuccess) {
       return;
     }
@@ -113,7 +134,7 @@ export function CreateAccessKeyDialog({ project_id }: CreateMachineKeyProps) {
 
     queryClient.invalidateQueries({ queryKey: ["project", project_id] });
 
-    setPrivateKey(generate_op.result.private_key);
+    setGeneratedKey(generate_op.result.private_key);
   }, [
     get_params,
     project_query,
@@ -126,7 +147,13 @@ export function CreateAccessKeyDialog({ project_id }: CreateMachineKeyProps) {
   ]);
 
   return (
-    <Modal isOpen={open} onOpenChange={setOpen}>
+    <Modal
+      isOpen={open}
+      onOpenChange={(isOpen) => {
+        setOpen(isOpen);
+        reset();
+      }}
+    >
       <Button variant="ghost" size="sm">
         <IconPlus className="text-accent" />
         Grant access
@@ -135,21 +162,61 @@ export function CreateAccessKeyDialog({ project_id }: CreateMachineKeyProps) {
         <Modal.Container>
           <Modal.Dialog className="w-full max-w-xl">
             <Modal.CloseTrigger />
-            <Modal.Header>
-              <Modal.Heading>Generate machine private key</Modal.Heading>
+            <Modal.Header className="flex flex-row items-center">
+              <Modal.Icon>
+                {is_federated && (
+                  <IconShieldFilled className="size-5 text-accent" />
+                )}
+                {!is_federated && (
+                  <IconKeyFilled className="size-5 text-accent" />
+                )}
+              </Modal.Icon>
+              <Modal.Heading>Generate access key</Modal.Heading>
             </Modal.Header>
             <Modal.Body>
               <form
                 className="flex flex-col gap-6 my-6"
                 onSubmit={(evt) => {
                   evt.preventDefault();
-                  generateKey();
+                  if (is_federated) {
+                  } else {
+                    generateStandardKey();
+                  }
                 }}
               >
+                <RadioGroup
+                  name="key-type"
+                  value={is_federated ? "federated" : "standard"}
+                  onChange={(value) => setIsFederated(value === "federated")}
+                  className="mb-5"
+                >
+                  <Label>Access Key Type</Label>
+                  {KEY_ITEMS.map((item) => (
+                    <Radio key={item.value} value={item.value}>
+                      <Radio.Content
+                        className={clsx(
+                          "group relative flex flex-col px-4 py-4 rounded-2xl text-justify items-start bg-background",
+                          "data-[selected=true]:bg-background-secondary data-[selected=true]:text-accent",
+                        )}
+                      >
+                        <Radio.Control className="absolute top-3 right-4">
+                          <Radio.Indicator />
+                        </Radio.Control>
+                        <Label className="text-inherit flex items-center gap-2">
+                          <item.Icon className="size-4" />
+                          {item.label}
+                        </Label>
+
+                        <Description>{item.description}</Description>
+                      </Radio.Content>
+                    </Radio>
+                  ))}
+                </RadioGroup>
+
                 <TextField
                   isRequired
                   variant="secondary"
-                  isDisabled={private_key !== null}
+                  isDisabled={generated_key !== null}
                 >
                   <Label>Key Name</Label>
                   <Input
@@ -165,7 +232,7 @@ export function CreateAccessKeyDialog({ project_id }: CreateMachineKeyProps) {
 
                 <TextField
                   variant="secondary"
-                  isDisabled={private_key !== null}
+                  isDisabled={generated_key !== null}
                 >
                   <Label>Description</Label>
                   <TextArea
@@ -180,7 +247,7 @@ export function CreateAccessKeyDialog({ project_id }: CreateMachineKeyProps) {
                 </TextField>
                 {project_query.isSuccess && (
                   <Select<string[]>
-                    disabled={private_key !== null}
+                    disabled={generated_key !== null}
                     multiselect
                     label="Environments"
                     items={project_query.data.environments.map((env) => ({
@@ -196,7 +263,7 @@ export function CreateAccessKeyDialog({ project_id }: CreateMachineKeyProps) {
                 )}
                 <ErrorDisplay value={error.value} />
 
-                {private_key !== null && (
+                {generated_key !== null && (
                   <Alert
                     title="Congratulations!"
                     status="success"
@@ -209,7 +276,7 @@ export function CreateAccessKeyDialog({ project_id }: CreateMachineKeyProps) {
                       </p>
                       <SimpleMono
                         className="wrap-break-word"
-                        value={private_key}
+                        value={generated_key}
                       />
                       <p>
                         You can now run commands or export secrets with this
@@ -217,16 +284,16 @@ export function CreateAccessKeyDialog({ project_id }: CreateMachineKeyProps) {
                       </p>
                       <SimpleMono
                         className="wrap-break-word"
-                        value={`spass run --[local/cloud] --private-key=${private_key} --env=${environments[0]} -- your command here`}
+                        value={`spass run --[local/cloud] --private-key=${generated_key} --env=${environments[0]} -- your command here`}
                       />
                       <SimpleMono
                         className="wrap-break-word"
-                        value={`spass export --[local/cloud] --private-key=${private_key} --env=${environments[0]}{" "} --format=[json/dot-env]`}
+                        value={`spass export --[local/cloud] --private-key=${generated_key} --env=${environments[0]}{" "} --format=[json/dot-env]`}
                       />
                     </div>
                   </Alert>
                 )}
-                {private_key === null && (
+                {generated_key === null && (
                   <div className="flex justify-end">
                     <Button
                       type="submit"
@@ -244,3 +311,25 @@ export function CreateAccessKeyDialog({ project_id }: CreateMachineKeyProps) {
     </Modal>
   );
 }
+
+const KEY_ITEMS: {
+  label: string;
+  Icon: TablerIcon;
+  value: string;
+  description: string;
+}[] = [
+  {
+    label: "Federated Access Key (recommended)",
+    description:
+      "These access keys generate short-live private keys on demand, the user remotely approves and shares encrypted values for this key, the key is discarded after use.",
+    Icon: IconShieldFilled,
+    value: "federated",
+  },
+  {
+    label: "Standard Access Key",
+    description:
+      "These are long living private keys that can decrypt secrets without user approval, these keys are security sensitive and should be avoided whenever possible",
+    Icon: IconKeyFilled,
+    value: "standard",
+  },
+];

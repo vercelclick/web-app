@@ -1,10 +1,5 @@
-import {
-  Breadcrumbs,
-  Button,
-  Description,
-  IconChevronDown,
-} from "@heroui/react";
-import { IconSettings, type TablerIcon } from "@tabler/icons-react";
+import { Breadcrumbs, Description } from "@heroui/react";
+import type { TablerIcon } from "@tabler/icons-react";
 import clsx from "clsx";
 import type { ReactNode } from "react";
 import { Link } from "react-router";

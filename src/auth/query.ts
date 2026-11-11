@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import type { SessionPackage } from "@/api-types/SessionPackage";
+import type { AuthSession } from "@/core";
 import { resolveApiRequest } from "@/utils";
 
 export const SESSION_QUERY_KEY = ["session"];
@@ -8,7 +8,7 @@ export function useSessionQuery() {
   return useQuery({
     queryKey: SESSION_QUERY_KEY,
     queryFn: (context) =>
-      resolveApiRequest<SessionPackage>("/api/auth/session", {
+      resolveApiRequest<AuthSession>("/api/auth/session", {
         signal: context.signal,
       }),
     retryDelay: 200,

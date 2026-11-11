@@ -4,13 +4,19 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import * as uuid from "uuid";
 import * as z from "zod";
-import type { CreateUserRequest } from "@/api-types/CreateUserRequest";
-import type { PasskeyCreationResult } from "@/api-types/PasskeyCreationResult";
-import type { PublicKeyGenerateResult } from "@/api-types/PublicKeyGenerateResult";
-import type { SessionPackage } from "@/api-types/SessionPackage";
 import type { ErrorHook } from "@/components/error";
-import { generateChallenge } from "@/components/otp";
-import { create_passkey, generate_public_keys, generate_salt } from "@/core";
+import {
+  generateWebauthnChallenge,
+  sendEmailChallenge,
+} from "@/components/otp";
+import {
+  type AuthTokenResponse,
+  type CreateUserRequest,
+  create_passkey,
+  generate_public_keys,
+  generate_salt,
+  type PasskeyCreationResult,
+} from "@/core";
 import { resolveApiRequest } from "@/utils";
 import { SESSION_QUERY_KEY } from "../query";
 
@@ -59,7 +65,7 @@ export function useSignupForm(error: ErrorHook) {
       if (passkey.challenge === "") {
         const challenge_op = await error.catch(
           "Error creating passkey challenge",
-          () => generateChallenge("PasskeySignup", profile.email),
+          () => generateWebauthnChallenge("PasskeySignup", profile.email),
           { capture: "signup_generate_passkey_challenge" },
         );
         if (!challenge_op.ok) {
@@ -86,7 +92,7 @@ export function useSignupForm(error: ErrorHook) {
         await error.catch(
           "Temporary error sending email code",
           () =>
-            generateChallenge("EmailSignup", profile.email, {
+            sendEmailChallenge("EmailSignup", profile.email, {
               name: profile.name,
             }),
           {
@@ -134,7 +140,7 @@ export function useSignupForm(error: ErrorHook) {
       const registration_result = await error.catch(
         "Error creating account",
         () =>
-          resolveApiRequest<SessionPackage>("/api/auth/register", {
+          resolveApiRequest<AuthTokenResponse>("/api/auth/register", {
             method: "POST",
             body: JSON.stringify({
               id: profile.id,
@@ -145,7 +151,8 @@ export function useSignupForm(error: ErrorHook) {
               confirmation_code: confirmation.confirmation_code,
               passkey_salt,
               passkey_result: create_result,
-              public_key_result: pubkey_op.result as PublicKeyGenerateResult,
+              public_key: pubkey_op.result.public_key,
+              auth_result: pubkey_op.result.auth_result,
             } satisfies CreateUserRequest),
           }),
         {
