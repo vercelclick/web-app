@@ -1,35 +1,53 @@
-import { createContext, type ReactNode, useContext, useMemo } from "react";
-import { CONNECTION_REFUSED_ERR } from "@/constants";
+import {
+  createContext,
+  type ReactNode,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
+import { SESSION_LOCAL_STORAGE_KEY } from "@/constants";
 import type { AuthSession } from "@/core";
+import { getSession } from "@/utils";
 import { AuthDashboard } from "./auth-dashboard";
-import { useSessionQuery } from "./query";
 
 const SessionContext = createContext<AuthSession>(JSON.parse("null"));
 
 export function SessionProvider({ children }: { children: ReactNode }) {
-  const session = useSessionQuery();
-  const connection_refused = useMemo(
-    () => String(session.error) === CONNECTION_REFUSED_ERR,
-    [session.error],
-  );
+  const session = useRawSession();
 
   return (
     <>
-      {session.isSuccess && (
-        <SessionContext.Provider value={session.data}>
+      {session !== null && (
+        <SessionContext.Provider value={session}>
           {children}
         </SessionContext.Provider>
       )}
-      {!session.isSuccess && (
-        <AuthDashboard
-          disconnected={connection_refused}
-          isPending={session.isPending}
-        />
-      )}
+      {session === null && <AuthDashboard />}
     </>
   );
 }
 
 export function useSession() {
   return useContext(SessionContext);
+}
+
+export function useRawSession() {
+  const [session, setSession] = useState<AuthSession | null>(null);
+
+  useEffect(() => {
+    setSession(getSession()?.session || null);
+
+    const handler = (event: StorageEvent) => {
+      if (event.key !== SESSION_LOCAL_STORAGE_KEY) {
+        return;
+      }
+
+      setSession(getSession()?.session || null);
+    };
+    window.addEventListener("storage", handler);
+
+    return () => window.removeEventListener("storage", handler);
+  }, []);
+
+  return session;
 }

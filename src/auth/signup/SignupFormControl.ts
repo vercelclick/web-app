@@ -1,24 +1,20 @@
 import { toast } from "@heroui/react";
 import { useForm } from "@tanstack/react-form";
-import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import * as uuid from "uuid";
 import * as z from "zod";
 import type { ErrorHook } from "@/components/error";
-import {
-  generateWebauthnChallenge,
-  sendEmailChallenge,
-} from "@/components/otp";
+import { sendEmailChallenge } from "@/components/otp";
 import {
   type AuthTokenResponse,
-  type CreateUserRequest,
   create_passkey,
   generate_public_keys,
   generate_salt,
   type PasskeyCreationResult,
+  type SignupRequest,
 } from "@/core";
-import { resolveApiRequest } from "@/utils";
-import { SESSION_QUERY_KEY } from "../query";
+import { resolveApiRequest, updateSessionToken } from "@/utils";
+import { generatePasskeySignupChallenge } from "@/utils/challenge";
 
 const signup_schema = z.object({
   profile: z.object({
@@ -40,7 +36,6 @@ export type SignupFormData = z.infer<typeof signup_schema>;
 
 export function useSignupForm(error: ErrorHook) {
   const [started, setStarted] = useState(false);
-  const queryClient = useQueryClient();
   const form = useForm({
     defaultValues: {
       profile: {
@@ -65,7 +60,7 @@ export function useSignupForm(error: ErrorHook) {
       if (passkey.challenge === "") {
         const challenge_op = await error.catch(
           "Error creating passkey challenge",
-          () => generateWebauthnChallenge("PasskeySignup", profile.email),
+          () => generatePasskeySignupChallenge(profile.email),
           { capture: "signup_generate_passkey_challenge" },
         );
         if (!challenge_op.ok) {
@@ -140,7 +135,7 @@ export function useSignupForm(error: ErrorHook) {
       const registration_result = await error.catch(
         "Error creating account",
         () =>
-          resolveApiRequest<AuthTokenResponse>("/api/auth/register", {
+          resolveApiRequest<AuthTokenResponse>("/api/v1/auth/signup", {
             method: "POST",
             body: JSON.stringify({
               id: profile.id,
@@ -153,7 +148,7 @@ export function useSignupForm(error: ErrorHook) {
               passkey_result: create_result,
               public_key: pubkey_op.result.public_key,
               auth_result: pubkey_op.result.auth_result,
-            } satisfies CreateUserRequest),
+            } satisfies SignupRequest),
           }),
         {
           capture: "signup_complete",
@@ -164,7 +159,7 @@ export function useSignupForm(error: ErrorHook) {
         return;
       }
 
-      queryClient.setQueryData(SESSION_QUERY_KEY, registration_result.result);
+      updateSessionToken(registration_result.result.token);
 
       toast("Registration successful!", { variant: "success" });
     },

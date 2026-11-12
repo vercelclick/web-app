@@ -2,7 +2,7 @@ import { Button, Description, Input, Label, TextField } from "@heroui/react";
 import { IconFingerprint } from "@tabler/icons-react";
 import { useSelector } from "@tanstack/react-form";
 import { type SubmitEventHandler, useCallback } from "react";
-import { ErrorDisplay, useError } from "@/components";
+import { ErrorDisplay, LoadingIcon, useError } from "@/components";
 import { ConfirmationCodeInput } from "@/components/otp";
 import { useSignupForm } from "./SignupFormControl";
 
@@ -110,8 +110,9 @@ export function SignupForm() {
           {(field) => (
             <ConfirmationCodeInput
               kind="EmailSignup"
-              owner={field.form.state.values.profile.email}
               onConfirmation={field.handleChange}
+              name={field.form.state.values.profile.name}
+              owner={field.form.state.values.profile.email}
             />
           )}
         </form.Field>
@@ -126,7 +127,11 @@ export function SignupForm() {
             size="lg"
             type="submit"
           >
-            <IconFingerprint />
+            <LoadingIcon
+              Icon={IconFingerprint}
+              loading={error.is_pending}
+              className="size-5"
+            />
             Create Passkey
           </Button>
         )}
@@ -138,7 +143,11 @@ export function SignupForm() {
             size="lg"
             type="submit"
           >
-            <IconFingerprint />
+            <LoadingIcon
+              Icon={IconFingerprint}
+              loading={error.is_pending}
+              className="size-5"
+            />
             Create Account
           </Button>
         )}

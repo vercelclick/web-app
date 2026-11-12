@@ -1,16 +1,16 @@
 import { useCallback, useMemo } from "react";
 import type { CatchOptions, ErrorHook } from "@/components/error";
-import { generateWebauthnChallenge } from "@/components/otp";
 import {
   type AuthorizationRequest,
   authorize_operation,
   type DecryptionAuthorizationRequest,
   type PrfDeriveConfig,
 } from "@/core";
+import { generateWebauthnAuthorizeChallenge } from "@/utils/challenge";
 import { useSession } from "./session.provider";
 
 export function useAuthorizationParams(error: ErrorHook) {
-  const { passkeys, user } = useSession();
+  const { passkeys } = useSession();
 
   const allowed_credentials = useMemo(
     () => passkeys.map((pk) => pk.cred_id),
@@ -22,7 +22,7 @@ export function useAuthorizationParams(error: ErrorHook) {
       error.catch(
         `Error generating ${operation} challenge`,
         () =>
-          generateWebauthnChallenge("PasskeyAuthorize", user.email).then(
+          generateWebauthnAuthorizeChallenge().then(
             ({ challenge }) =>
               ({
                 challenge,
@@ -31,7 +31,7 @@ export function useAuthorizationParams(error: ErrorHook) {
           ),
         options,
       ),
-    [user.email, allowed_credentials, error.catch],
+    [allowed_credentials, error.catch],
   );
 
   return compileParams;
@@ -58,7 +58,7 @@ export function useDecryptionParams(error: ErrorHook) {
       error.catch(
         `Error generating ${operation} challenge`,
         () =>
-          generateWebauthnChallenge("PasskeyAuthorize", user.email).then(
+          generateWebauthnAuthorizeChallenge().then(
             ({ challenge }) =>
               ({
                 challenge,
@@ -67,7 +67,7 @@ export function useDecryptionParams(error: ErrorHook) {
           ),
         options,
       ),
-    [user.email, prf_configs, error.catch],
+    [prf_configs, error.catch],
   );
 
   return compileParams;

@@ -9,16 +9,11 @@ import {
 } from "@heroui/react";
 import { IconCircleCheck, IconFingerprint } from "@tabler/icons-react";
 import { useForm } from "@tanstack/react-form";
-import { useQueryClient } from "@tanstack/react-query";
 import { type SubmitEventHandler, useCallback, useState } from "react";
 import * as z from "zod";
-import { SESSION_QUERY_KEY, useSession } from "@/auth";
+import { useSession } from "@/auth";
 import { ErrorDisplay, useError } from "@/components";
-import {
-  ConfirmationCodeInput,
-  generateWebauthnChallenge,
-  sendEmailChallenge,
-} from "@/components/otp";
+import { ConfirmationCodeInput, sendEmailChallenge } from "@/components/otp";
 import {
   type AuthTokenResponse,
   type CreatePasskeyRequest,
@@ -27,7 +22,8 @@ import {
   generate_salt,
   type PasskeyCreationResult,
 } from "@/core";
-import { resolveApiRequest } from "@/utils";
+import { resolveApiRequest, updateSessionToken } from "@/utils";
+import { generatePasskeyCreateChallenge } from "@/utils/challenge";
 
 const createSchema = z.object({
   passkey_name: z.string().min(2),
@@ -44,12 +40,11 @@ export function CreatePasskeyButton(props: ButtonProps) {
   const error = useError();
   const { user, passkeys } = useSession();
   const [success, setSuccess] = useState(false);
-  const queryClient = useQueryClient();
 
   const createPasskey = useCallback(async () => {
     const passkey_challenge_op = await error.catch(
       "Error starting passkey creation",
-      () => generateWebauthnChallenge("PasskeyCreate", user.email),
+      () => generatePasskeyCreateChallenge(),
     );
     if (!passkey_challenge_op.ok) {
       return;
@@ -134,15 +129,7 @@ export function CreatePasskeyButton(props: ButtonProps) {
         return;
       }
 
-      queryClient
-        .invalidateQueries({
-          queryKey: SESSION_QUERY_KEY,
-        })
-        .then(() => {
-          setSuccess(true);
-          setCreateResponse(null);
-          data.formApi.reset();
-        });
+      updateSessionToken(save_response.result.token);
     },
   });
 

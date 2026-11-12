@@ -8,22 +8,15 @@ import {
 } from "@heroui/react";
 import { IconLogout2, IconUserCircle } from "@tabler/icons-react";
 import { type MouseEventHandler, useCallback } from "react";
-import { useLogoutMutation } from "@/auth/query";
-import { DropdownItem, useError } from "@/components";
+import { DropdownItem } from "@/components";
 import type { User } from "@/core";
+import { updateSessionToken } from "@/utils";
 import { COMMUNITY_LINKS, RESOURCES_LINKS } from "./links";
 
 export function UserProfileButton({ user }: { user: User }) {
-  const error = useError();
-  const logout = useLogoutMutation();
   const logoutCallback: MouseEventHandler = useCallback(() => {
-    error
-      .catch("Error while attempting to logout", () => logout.mutateAsync(), {
-        capture: "logout",
-        toast: true,
-      })
-      .catch();
-  }, [error.catch, logout.mutateAsync]);
+    updateSessionToken(null);
+  }, []);
 
   return (
     <Dropdown>

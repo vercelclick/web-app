@@ -9,37 +9,22 @@ import {
 import clsx from "clsx";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type {
-  ChallengeKind,
   CheckChallengeRequest,
   CheckChallengeResult,
+  EmailChallengeKind,
   EmailChallengeRequest,
-  WebauthnChallengeRequest,
-  WebauthnChallengeResponse,
 } from "@/core";
 import { resolveApiRequest } from "@/utils";
 import { ErrorDisplay, useError } from "./error";
 
 const CODE_PATTERN = /[^ABCDEFGHJKLMNPQRSTUVWXYZ23456789]/g;
 
-export async function generateWebauthnChallenge(
-  kind: ChallengeKind,
-  owner: string,
-) {
-  return resolveApiRequest<WebauthnChallengeResponse>("/api/auth/challenge", {
-    method: "POST",
-    body: JSON.stringify({
-      kind,
-      owner,
-    } satisfies WebauthnChallengeRequest),
-  });
-}
-
 export async function sendEmailChallenge(
-  kind: ChallengeKind,
+  kind: EmailChallengeKind,
   owner: string,
   options?: { name?: string; operation?: string },
 ) {
-  return resolveApiRequest<WebauthnChallengeResponse>("/api/auth/challenge", {
+  return resolveApiRequest("/api/v1/auth/challenge/email", {
     method: "POST",
     body: JSON.stringify({
       kind,
@@ -51,7 +36,7 @@ export async function sendEmailChallenge(
 }
 
 const MAX_RESENDS = 5;
-const DEFAULT_WAIT_TIME = 60;
+const DEFAULT_WAIT_TIME = 30;
 
 export function ConfirmationCodeInput({
   kind,
@@ -60,7 +45,7 @@ export function ConfirmationCodeInput({
   operation,
   name,
 }: {
-  kind: ChallengeKind;
+  kind: EmailChallengeKind;
   owner: string;
   onConfirmation: (final_value: string) => void;
   operation?: string;
@@ -79,8 +64,10 @@ export function ConfirmationCodeInput({
   );
 
   const sendConfirmationCode = useCallback(async () => {
-    const response = await error.catch("Error sending confirmation code", () =>
-      sendEmailChallenge(kind, owner, { operation, name }),
+    const response = await error.catch(
+      "Error sending confirmation code",
+      () => sendEmailChallenge(kind, owner, { operation, name }),
+      { toast: true },
     );
     setSendCount((current) => current + 1);
     if (!response.ok) {
@@ -104,14 +91,17 @@ export function ConfirmationCodeInput({
 
   const onComplete = useCallback(async () => {
     const result = await error.catch("Error checking code validity", () =>
-      resolveApiRequest<CheckChallengeResult>("/api/auth/challenge/check", {
-        method: "POST",
-        body: JSON.stringify({
-          kind,
-          owner,
-          value,
-        } satisfies CheckChallengeRequest),
-      }),
+      resolveApiRequest<CheckChallengeResult>(
+        "/api/v1/auth/challenge/email/check",
+        {
+          method: "POST",
+          body: JSON.stringify({
+            kind,
+            owner,
+            value,
+          } satisfies CheckChallengeRequest),
+        },
+      ),
     );
 
     if (!result.ok) {

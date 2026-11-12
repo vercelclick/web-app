@@ -36,7 +36,7 @@ const HELP_TOPICS: HelpTopicItem[] = [
   {
     title: "Why is my project under inaccessible projects?",
     details:
-      "The project is attached to secretpass locally but it's not under the current user name, just login with the relevant username to access the project.",
+      "The project is attached to the local vault but you don't have access under the current user, sign in with the relevant user to access the project.",
   },
 ];
 

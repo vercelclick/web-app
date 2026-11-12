@@ -5,10 +5,10 @@ import { useCallback } from "react";
 import TimeAgo from "react-timeago";
 import { useSession } from "@/auth";
 import { Alert, useError } from "@/components";
-import { generateWebauthnChallenge } from "@/components/otp";
 import { SectionHeader } from "@/components/sections/header";
-import { authorize_operation, type Passkey, type User } from "@/core";
+import { authorize_operation, type Passkey } from "@/core";
 import { CreatePasskeyButton } from "@/user/CreatePasskey";
+import { generateWebauthnAuthorizeChallenge } from "@/utils/challenge";
 
 export function PasskeysList() {
   const session = useSession();
@@ -38,11 +38,7 @@ export function PasskeysList() {
 
         <div className="grid gap-x-6 gap-y-4 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
           {session.passkeys.map((passkey) => (
-            <PasskeyItem
-              key={passkey.cred_id}
-              passkey={passkey}
-              user={session.user}
-            />
+            <PasskeyItem key={passkey.cred_id} passkey={passkey} />
           ))}
         </div>
       </div>
@@ -50,12 +46,12 @@ export function PasskeysList() {
   );
 }
 
-function PasskeyItem({ passkey, user }: { passkey: Passkey; user: User }) {
+function PasskeyItem({ passkey }: { passkey: Passkey }) {
   const error = useError();
   const onVerify = useCallback(async () => {
     const challenge_op = await error.catch(
       "Error creating challenge",
-      () => generateWebauthnChallenge("PasskeyAuthorize", user.email),
+      () => generateWebauthnAuthorizeChallenge(),
       { toast: true },
     );
 
@@ -78,7 +74,7 @@ function PasskeyItem({ passkey, user }: { passkey: Passkey; user: User }) {
         variant: "success",
       });
     }
-  }, [user.email, passkey.cred_id, passkey.name, error.catch]);
+  }, [passkey.cred_id, passkey.name, error.catch]);
 
   return (
     <div className="group bg-background hover:bg-background-secondary p-4 rounded-xl flex gap-4 items-start">

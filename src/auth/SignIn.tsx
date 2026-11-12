@@ -3,99 +3,97 @@ import {
   Description,
   Input,
   Label,
+  Separator,
   TextField,
   toast,
 } from "@heroui/react";
 import { IconArrowRight, IconFingerprint, IconMail } from "@tabler/icons-react";
 import { useForm, useSelector } from "@tanstack/react-form";
-import { useQueryClient } from "@tanstack/react-query";
 import clsx from "clsx";
 import { type SubmitEventHandler, useCallback, useState } from "react";
 import * as z from "zod";
 import { ErrorDisplay, useError } from "@/components";
+import { LoadingCircle } from "@/components/loader";
+import { ConfirmationCodeInput, sendEmailChallenge } from "@/components/otp";
 import {
-  ConfirmationCodeInput,
-  generateWebauthnChallenge,
-  sendEmailChallenge,
-} from "@/components/otp";
-import {
-  type AuthSession,
+  type AuthTokenResponse,
   authorize_operation,
-  type EmailLoginRequest,
-  type PasskeyLoginRequest,
+  type EmailSignInRequest,
+  type PasskeySignInRequest,
 } from "@/core";
-import { resolveApiRequest } from "@/utils";
-import { SESSION_QUERY_KEY } from "./query";
+import { resolveApiRequest, updateSessionToken } from "@/utils";
+import { generatePasskeySignInChallenge } from "@/utils/challenge";
 
-const login_schema = z.object({
+const signin_schema = z.object({
   email_address: z.email(),
   confirmation_code: z.string(),
 });
 
-type SignInFormData = z.infer<typeof login_schema>;
+type SignInFormData = z.infer<typeof signin_schema>;
 
 export function SignInForm() {
   const error = useError();
-  const queryClient = useQueryClient();
   const [started, setStarted] = useState(false);
 
-  const loginWithPasskey = useCallback(
-    async (email: string, challenge: string) => {
-      const auth_result = await error.catch(
-        "Error authorizing with passkey",
-        () =>
-          authorize_operation({
-            challenge,
-            allowed_credentials: undefined,
-          }),
-      );
+  const signInWithPasskey = useCallback(async () => {
+    const challenge_op = await error.catch(
+      "Error generating passkey challenge",
+      () => generatePasskeySignInChallenge(),
+    );
 
-      if (!auth_result.ok) {
-        return;
-      }
+    if (!challenge_op.ok) {
+      return;
+    }
 
-      const completion_result = await error.catch(
-        "Error completing signing in process",
-        () =>
-          resolveApiRequest<AuthSession>("/api/auth/login/passkey", {
-            method: "POST",
-            body: JSON.stringify({
-              owner: email,
-              auth_response: auth_result.result,
-            } satisfies PasskeyLoginRequest),
-          }),
-      );
+    const auth_result = await error.catch("Error signing in with passkey", () =>
+      authorize_operation({
+        challenge: challenge_op.result.challenge,
+        allowed_credentials: [],
+      }),
+    );
 
-      if (!completion_result.ok) {
-        return;
-      }
+    if (!auth_result.ok) {
+      return;
+    }
 
-      queryClient.setQueryData(SESSION_QUERY_KEY, completion_result.result);
-      toast("Login successful!", { variant: "success" });
-    },
-    [error.catch, queryClient],
-  );
+    const completion_result = await error.catch(
+      "Error completing signing in process",
+      () =>
+        resolveApiRequest<AuthTokenResponse>("/api/v1/auth/signin/passkey", {
+          method: "POST",
+          body: JSON.stringify({
+            owner: challenge_op.result.owner,
+            auth_response: auth_result.result,
+          } satisfies PasskeySignInRequest),
+        }),
+    );
+
+    if (!completion_result.ok) {
+      return;
+    }
+
+    updateSessionToken(completion_result.result.token);
+
+    toast("Sign in successful!", { variant: "success" });
+  }, [error.catch]);
 
   const form = useForm({
     defaultValues: {
       email_address: "",
       confirmation_code: "",
     } satisfies SignInFormData,
-    validators: { onChange: login_schema, onMount: login_schema },
-    onSubmit: async ({
-      value: { email_address, confirmation_code },
-      meta: { email_only },
-    }) => {
+    validators: { onChange: signin_schema, onMount: signin_schema },
+    onSubmit: async ({ value: { email_address, confirmation_code } }) => {
       if (confirmation_code) {
         const completion_result = await error.catch(
-          "Error completing login",
+          "Error completing sign in",
           () =>
-            resolveApiRequest<AuthSession>("/api/auth/login/email", {
+            resolveApiRequest<AuthTokenResponse>("/api/v1/auth/signin/email", {
               method: "POST",
               body: JSON.stringify({
                 email_address,
                 confirmation_code,
-              } satisfies EmailLoginRequest),
+              } satisfies EmailSignInRequest),
             }),
         );
 
@@ -103,33 +101,19 @@ export function SignInForm() {
           return;
         }
 
-        queryClient.setQueryData(SESSION_QUERY_KEY, completion_result.result);
-        toast("Login successful!", { variant: "success" });
+        updateSessionToken(completion_result.result.token);
+        toast("Sign in successful!", { variant: "success" });
 
         return;
       }
 
-      if (email_only) {
-        await error.catch(
-          "Error sending signin code, if not received, please resend",
-          () => sendEmailChallenge("EmailSignIn", email_address),
-          { toast: true },
-        );
-        setStarted(true);
-        return;
-      }
-
-      const challenge_op = await error.catch(
-        "Error starting sign in process",
-        () => generateWebauthnChallenge("PasskeySignIn", email_address),
+      await error.catch(
+        "Error sending signin code, if not received, please resend",
+        () => sendEmailChallenge("EmailSignIn", email_address),
+        { toast: true },
       );
-      if (!challenge_op.ok) {
-        return;
-      }
-
-      loginWithPasskey(email_address, challenge_op.result.challenge);
+      setStarted(true);
     },
-    onSubmitMeta: { email_only: false },
   });
 
   const email_valid = useSelector(
@@ -141,16 +125,34 @@ export function SignInForm() {
     (event) => {
       event.preventDefault();
 
-      const email_only =
-        (event.submitter as HTMLButtonElement)?.value === "true";
-
-      form.handleSubmit({ email_only });
+      form.handleSubmit();
     },
     [form.handleSubmit],
   );
 
   return (
     <form className="flex flex-col gap-6" onSubmit={onSubmit}>
+      <div className="flex justify-center my-2">
+        <Button
+          aria-label="Signin with Passkey"
+          isDisabled={error.is_pending}
+          size="lg"
+          type="button"
+          value="false"
+          onClick={signInWithPasskey}
+        >
+          {!error.is_pending && <IconFingerprint className="size-5" />}
+          {error.is_pending && <LoadingCircle className="size-5" />}
+          Sign in with a Passkey
+        </Button>
+      </div>
+
+      <div className="flex gap-6 items-center">
+        <Separator className="flex-1" />
+        Or
+        <Separator className="flex-1" />
+      </div>
+
       <form.Field name="email_address">
         {(field) => (
           <TextField
@@ -161,7 +163,7 @@ export function SignInForm() {
           >
             <Label htmlFor="id">Email address</Label>
             <Input
-              autoComplete="email webauthn"
+              autoComplete="email"
               spellCheck={false}
               type="email"
               name={field.name}
@@ -192,8 +194,7 @@ export function SignInForm() {
 
       <div
         className={clsx(
-          "flex gap-4 flex-col-reverse md:flex-row items-center",
-          started ? "justify-end" : "justify-between",
+          "flex gap-4 flex-col-reverse md:flex-row items-center justify-end",
         )}
       >
         {!started && (
@@ -207,19 +208,6 @@ export function SignInForm() {
           >
             <IconMail className="size-5" />
             Sign in with Email
-          </Button>
-        )}
-
-        {!started && (
-          <Button
-            aria-label="Proceed with Passkey"
-            isDisabled={error.is_pending || !email_valid}
-            size="lg"
-            type="submit"
-            value="false"
-          >
-            <IconFingerprint className="size-5" />
-            Sign in with a Passkey
           </Button>
         )}
 

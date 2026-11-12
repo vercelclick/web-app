@@ -21,6 +21,7 @@ export const SAFE_NAME_SCHEMA = z
       "Invalid variable name (letters, numbers, underscores, cannot start with a number).",
   });
 
+export const SESSION_LOCAL_STORAGE_KEY = "click-session";
 export const LOCAL_API_BASE_URL =
   import.meta.env.VITE_LOCAL_API_BASE_URL ?? "https://localhost:20206";
 export const CLOUD_API_BASE_URL =
