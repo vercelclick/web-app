@@ -1,10 +1,5 @@
 import { Button, IconPlus } from "@heroui/react";
-import {
-  IconClock,
-  IconCloud,
-  IconDeviceLaptop,
-  IconFolder,
-} from "@tabler/icons-react";
+import { IconCloud, IconDeviceLaptop, IconFolder } from "@tabler/icons-react";
 import clsx from "clsx";
 import { Link } from "react-router";
 import TimeAgo from "react-timeago";
@@ -28,7 +23,7 @@ export function ProjectsList({ projects }: { projects: ProjectListItem[] }) {
       <div className="bg-surface px-4 py-6 rounded-xl">
         {projects.length === 0 && (
           <Alert
-            status="warning"
+            status="default"
             className="rounded-2xl bg-background shadow-none"
             title="Create, attach or request access to projects"
           >

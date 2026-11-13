@@ -41,7 +41,7 @@ export function AccessKeysList({
       <SectionHeader
         title={
           <>
-            <IconBotId className="size-6 text-accent" /> Machine Access
+            <IconBotId className="size-6 text-accent" /> Access Keys
           </>
         }
       >
@@ -50,7 +50,7 @@ export function AccessKeysList({
       <div className="bg-surface px-4 py-6 rounded-xl">
         {access_keys.length === 0 && (
           <Alert
-            status="warning"
+            status="default"
             className="rounded-2xl bg-background shadow-none"
           >
             You don't have any access keys at the moment, click add access key

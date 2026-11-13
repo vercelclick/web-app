@@ -6,7 +6,7 @@ import {
   IconKeyFilled,
   IconLock,
   IconLockOpen2,
-  IconShieldCheckeredFilled,
+  IconShieldFilled,
   IconShieldHalfFilled,
   IconTag,
 } from "@tabler/icons-react";
@@ -285,151 +285,130 @@ export function SecretItem({
   useVisibleAction(ref, undefined, onVisibilityChange);
 
   return (
-    <div
-      ref={ref}
-      className={clsx(
-        "bg-background-secondary px-6 py-4 rounded-xl flex flex-col focus-within:border focus-within:border-accent",
-      )}
-    >
-      <div className="flex items-start gap-4 flex-col md:flex-row">
-        <div className="w-full md:w-1/3 xl:w-1/4 text-base text-left font-mono font-light flex justify-between items-center">
-          <div className="flex flex-col gap-1">
-            <div className="flex gap-2 items-center">
-              {locked && <IconShieldCheckeredFilled className="size-5" />}
-              {!locked && <IconShieldHalfFilled className="size-5" />}
-              {definition.name}
-            </div>
-            <div className="text-muted font-mono text-xs">
-              <TimeAgo date={definition.updated_at} />
-            </div>
-          </div>
-          <Button
-            isIconOnly
-            variant="ghost"
-            size="sm"
-            className={clsx(
-              "inline md:hidden",
-              locked ? "hover:text-yellow-800" : "hover:text-success",
-            )}
-            onClick={locked ? unLock : reset}
-          >
-            {locked && <IconLock className="size-5" />}
-            {!locked && <IconLockOpen2 className="size-5" />}
-          </Button>
+    <div className="relative bg-background-secondary px-6 py-4 rounded-xl focus-within:border focus-within:border-accent flex md:items-start gap-4 flex-col md:flex-row">
+      <div className="w-full md:w-1/3 xl:w-1/4 text-base text-left font-mono font-light flex flex-col gap-1">
+        <div className="flex gap-2 items-center">
+          {locked && <IconShieldFilled className="size-5" />}
+          {!locked && <IconShieldHalfFilled className="size-5" />}
+          {definition.name}
         </div>
-        <div className={clsx("flex flex-col grow", locked ? "gap-1" : "gap-4")}>
-          <InputGroup
-            isDisabled={locked}
-            variant={locked ? "secondary" : "primary"}
-            className="group relative"
-          >
-            <InputGroup.Prefix>
-              <IconKeyFilled className="text-muted size-5" />
-            </InputGroup.Prefix>
-            <InputGroup.TextArea
-              disabled={locked || error.is_pending}
-              placeholder={locked ? "--ENCRYPTED-SECRET--" : "SECRET VALUE..."}
-              value={updated_value ?? latest_value ?? ""}
-              onChange={(evt) => setUpdatedValue(evt.currentTarget.value)}
+        <div className="text-muted font-mono text-xs">
+          <TimeAgo date={definition.updated_at} />
+        </div>
+      </div>
+      <div className={clsx("flex flex-col grow", locked ? "gap-1" : "gap-4")}>
+        <InputGroup
+          isDisabled={locked}
+          variant={locked ? "secondary" : "primary"}
+          className="group relative"
+        >
+          <InputGroup.Prefix>
+            <IconKeyFilled className="text-muted size-5" />
+          </InputGroup.Prefix>
+          <InputGroup.TextArea
+            disabled={locked || error.is_pending}
+            placeholder={locked ? "--ENCRYPTED-SECRET--" : "SECRET VALUE..."}
+            value={updated_value ?? latest_value ?? ""}
+            onChange={(evt) => setUpdatedValue(evt.currentTarget.value)}
+            className={clsx(
+              "field-sizing-content overflow-x-auto resize-none max-h-24 font-mono",
+            )}
+          />
+          <div className="absolute top-2 right-3 flex items-center gap-2">
+            <Button
+              isDisabled={error.is_pending}
               className={clsx(
-                "field-sizing-content overflow-x-auto resize-none max-h-24 font-mono",
+                "h-auto",
+                typeof updated_value === "undefined" && "hidden",
+                updated_value === latest_value && "hidden",
+              )}
+              size="sm"
+              variant="secondary"
+              onClick={updateSecretValue}
+            >
+              <IconFingerprint /> Update
+            </Button>
+
+            <CopyIcon
+              value={updated_value ?? latest_value ?? ""}
+              className="size-5 hidden group-hover:inline"
+            />
+          </div>
+        </InputGroup>
+
+        <InputGroup
+          className={clsx(
+            locked && definition.comments.trim().length === 0 && "hidden",
+          )}
+          isDisabled={locked}
+          variant={locked ? "secondary" : "primary"}
+        >
+          <InputGroup.Prefix>
+            <IconAlignLeft className="text-muted size-5" />
+          </InputGroup.Prefix>
+          <InputGroup.TextArea
+            disabled={error.is_pending}
+            className={clsx("field-sizing-content resize-none max-h-24")}
+            placeholder="Comments..."
+            value={updated_comments ?? definition.comments}
+            onChange={(evt) => setUpdatedComments(evt.currentTarget.value)}
+          />
+          <InputGroup.Suffix>
+            <Button
+              isDisabled={error.is_pending}
+              className={clsx(
+                "h-auto",
+                typeof updated_comments === "undefined" && "hidden",
+                updated_comments === definition.comments && "hidden",
+              )}
+              size="sm"
+              variant="secondary"
+              onClick={updateSecret}
+            >
+              <IconCircleCheck /> Update
+            </Button>
+          </InputGroup.Suffix>
+        </InputGroup>
+
+        {(tag_values?.length ?? 0) > 0 && <Separator variant="secondary" />}
+        {tag_values?.map((value) => (
+          <InputGroup key={value.tag} className="group relative">
+            <InputGroup.Prefix>
+              <IconTag className="text-muted size-4" />
+            </InputGroup.Prefix>
+
+            <InputGroup.TextArea
+              readOnly
+              value={value.plain_value}
+              className={clsx(
+                "field-sizing-content resize-none max-h-24 text-sm font-mono text-muted",
               )}
             />
-            <div className="absolute top-2 right-2 flex items-center gap-2">
-              <Button
-                isDisabled={error.is_pending}
-                className={clsx(
-                  "h-auto",
-                  typeof updated_value === "undefined" && "hidden",
-                  updated_value === latest_value && "hidden",
-                )}
-                size="sm"
-                variant="secondary"
-                onClick={updateSecretValue}
-              >
-                <IconFingerprint /> Update
-              </Button>
 
+            <div className="absolute top-2 right-2 flex items-center gap-2">
+              <span className="text-sm text-muted">{value.tag}</span>
               <CopyIcon
-                value={updated_value ?? latest_value ?? ""}
+                value={value.plain_value}
                 className="size-5 hidden group-hover:inline"
               />
             </div>
           </InputGroup>
-
-          <InputGroup
-            className={clsx(
-              locked && definition.comments.trim().length === 0 && "hidden",
-            )}
-            isDisabled={locked}
-            variant={locked ? "secondary" : "primary"}
-          >
-            <InputGroup.Prefix>
-              <IconAlignLeft className="text-muted size-5" />
-            </InputGroup.Prefix>
-            <InputGroup.TextArea
-              disabled={error.is_pending}
-              className={clsx("field-sizing-content resize-none max-h-24")}
-              placeholder="Comments..."
-              value={updated_comments ?? definition.comments}
-              onChange={(evt) => setUpdatedComments(evt.currentTarget.value)}
-            />
-            <InputGroup.Suffix>
-              <Button
-                isDisabled={error.is_pending}
-                className={clsx(
-                  "h-auto",
-                  typeof updated_comments === "undefined" && "hidden",
-                  updated_comments === definition.comments && "hidden",
-                )}
-                size="sm"
-                variant="secondary"
-                onClick={updateSecret}
-              >
-                <IconCircleCheck /> Update
-              </Button>
-            </InputGroup.Suffix>
-          </InputGroup>
-
-          {(tag_values?.length ?? 0) > 0 && <Separator variant="secondary" />}
-          {tag_values?.map((value) => (
-            <InputGroup key={value.tag} className="group relative">
-              <InputGroup.Prefix>
-                <IconTag className="text-muted size-4" />
-              </InputGroup.Prefix>
-
-              <InputGroup.TextArea
-                readOnly
-                value={value.plain_value}
-                className={clsx(
-                  "field-sizing-content resize-none max-h-24 text-sm font-mono text-muted",
-                )}
-              />
-
-              <div className="absolute top-2 right-2 flex items-center gap-2">
-                <span className="text-sm text-muted">{value.tag}</span>
-                <CopyIcon
-                  value={value.plain_value}
-                  className="size-5 hidden group-hover:inline"
-                />
-              </div>
-            </InputGroup>
-          ))}
-        </div>
-        <Button
-          isIconOnly
-          variant="ghost"
-          size="sm"
-          className={clsx(
-            "hidden md:inline",
-            locked ? "hover:text-yellow-800" : "hover:text-success",
-          )}
-          onClick={locked ? unLock : reset}
-        >
-          {locked && <IconLock className="size-5" />}
-          {!locked && <IconLockOpen2 className="size-5" />}
-        </Button>
+        ))}
       </div>
+
+      <Button
+        isIconOnly
+        variant="secondary"
+        size="sm"
+        className={clsx(
+          "absolute right-2 top-1",
+          locked ? "hover:text-yellow-800" : "hover:text-success",
+        )}
+        onClick={locked ? unLock : reset}
+      >
+        {locked && <IconLock className="size-5" />}
+        {!locked && <IconLockOpen2 className="size-5" />}
+      </Button>
     </div>
   );
 }

@@ -13,7 +13,7 @@ import {
 import {
   IconFingerprint,
   IconKeyFilled,
-  IconShieldFilled,
+  IconShieldCheckeredFilled,
   type TablerIcon,
 } from "@tabler/icons-react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -78,7 +78,7 @@ export function CreateAccessKeyDialog({ project_id }: CreateMachineKeyProps) {
         Promise.all(
           environments.map((env_name) =>
             resolveApiRequest<GetEnvironmentResult>(
-              `/api/projects/${project_id}/env/${env_name}`,
+              `/api/v1/projects/${project_id}/env/${env_name}`,
             ),
           ),
         ),
@@ -112,7 +112,7 @@ export function CreateAccessKeyDialog({ project_id }: CreateMachineKeyProps) {
     }
 
     const save_op = await error.catch("Error saving private key", () =>
-      resolveApiRequest(`/api/projects/${project_id}/access-keys`, {
+      resolveApiRequest(`/api/v1/projects/${project_id}/access-keys`, {
         method: "POST",
         body: JSON.stringify({
           id: generate_op.result.public_key.target,
@@ -168,7 +168,7 @@ export function CreateAccessKeyDialog({ project_id }: CreateMachineKeyProps) {
             <Modal.Header className="flex flex-row items-center">
               <Modal.Icon>
                 {is_federated && (
-                  <IconShieldFilled className="size-5 text-accent" />
+                  <IconShieldCheckeredFilled className="size-5 text-accent" />
                 )}
                 {!is_federated && (
                   <IconKeyFilled className="size-5 text-accent" />
@@ -325,7 +325,7 @@ const KEY_ITEMS: {
     label: "Federated Access Key (recommended)",
     description:
       "These access keys generate short-live private keys on demand, the user remotely approves and shares encrypted values for this key, the key is discarded after use.",
-    Icon: IconShieldFilled,
+    Icon: IconShieldCheckeredFilled,
     value: "federated",
   },
   {
