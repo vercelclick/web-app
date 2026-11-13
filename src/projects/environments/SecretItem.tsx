@@ -6,10 +6,13 @@ import {
   IconKeyFilled,
   IconLock,
   IconLockOpen2,
+  IconShieldCheckeredFilled,
+  IconShieldHalfFilled,
   IconTag,
 } from "@tabler/icons-react";
 import clsx from "clsx";
 import { useCallback, useMemo, useRef, useState } from "react";
+import TimeAgo from "react-timeago";
 import {
   useAuthorizationParams,
   useDecryptionParams,
@@ -285,12 +288,21 @@ export function SecretItem({
     <div
       ref={ref}
       className={clsx(
-        "bg-background-secondary px-6 py-4 rounded-xl flex flex-col",
+        "bg-background-secondary px-6 py-4 rounded-xl flex flex-col focus-within:border focus-within:border-accent",
       )}
     >
       <div className="flex items-start gap-4 flex-col md:flex-row">
         <div className="w-full md:w-1/3 xl:w-1/4 text-base text-left font-mono font-light flex justify-between items-center">
-          {definition.name}
+          <div className="flex flex-col gap-1">
+            <div className="flex gap-2 items-center">
+              {locked && <IconShieldCheckeredFilled className="size-5" />}
+              {!locked && <IconShieldHalfFilled className="size-5" />}
+              {definition.name}
+            </div>
+            <div className="text-muted font-mono text-xs">
+              <TimeAgo date={definition.updated_at} />
+            </div>
+          </div>
           <Button
             isIconOnly
             variant="ghost"

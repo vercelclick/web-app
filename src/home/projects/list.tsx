@@ -4,7 +4,6 @@ import {
   IconCloud,
   IconDeviceLaptop,
   IconFolder,
-  IconShieldHalfFilled,
 } from "@tabler/icons-react";
 import clsx from "clsx";
 import { Link } from "react-router";
@@ -65,40 +64,36 @@ export function ProjectCard({
     <Link
       to={`/p/${project.id}`}
       className={clsx(
-        "bg-background px-4 pt-4 pb-2 rounded-xl flex gap-4 items-start",
-        inaccessible && "text-muted",
+        "bg-background px-4 pt-4 pb-2 rounded-xl flex flex-col gap-2",
+        inaccessible && "text-muted pointer-events-none",
         !inaccessible && "hover:bg-background-secondary",
       )}
     >
-      {path !== null && (
-        <IconDeviceLaptop
-          className={clsx("size-6", inaccessible ? "" : "text-accent")}
-        />
-      )}
-      {path === null && <IconCloud className="size-6 text-accent" />}
-      <div className="flex flex-col gap-2 grow">
-        <div
-          className={clsx("font-semibold", inaccessible ? "" : "text-accent")}
-        >
+      <div className="flex gap-2">
+        {path !== null && (
+          <IconDeviceLaptop
+            className={clsx("size-6", inaccessible && "text-muted")}
+          />
+        )}
+        {path === null && <IconCloud className="size-6" />}
+        <div className={clsx("font-semibold", inaccessible && "text-muted")}>
           {project.name}
         </div>
-        {project.description && (
-          <div className="text-xs text-muted">{project.description}</div>
-        )}
+      </div>
 
-        <div className="flex justify-between items-end grow text-xs font-mono text-muted">
-          <div className="flex gap-1 font-mono items-end">
-            <IconClock className="size-4" />
-            <TimeAgo date={created_at} />
+      {project.description && (
+        <div className="text-xs text-muted">{project.description}</div>
+      )}
+
+      <div className="flex items-end grow text-xs font-mono text-muted">
+        {path !== null && (
+          <div className="flex gap-1 items-end">
+            <IconFolder className="size-4" />
+            {path.short_path}
           </div>
-
-          {path !== null && (
-            <div className="flex gap-1 font-mono items-end">
-              <IconFolder className="size-4" />
-              {path.short_path}
-            </div>
-          )}
-        </div>
+        )}
+        <div className="grow" />
+        <TimeAgo date={created_at} />
       </div>
     </Link>
   );

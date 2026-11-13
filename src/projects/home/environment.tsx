@@ -14,17 +14,18 @@ export function EnvironmentItem({
   return (
     <Link
       to={`/p/${project_id}/env/${environment.name}`}
-      className="bg-background hover:bg-background-secondary p-4 flex gap-4 items-start rounded-xl"
+      className="bg-background hover:bg-background-secondary p-4 flex flex-col gap-2 rounded-xl"
     >
-      <IconCode className="h-6 w-auto text-muted" />
-      <div className="flex flex-col grow gap-1">
-        <pre className="font-mono text-lg">{environment.name}</pre>
-        {environment.description && (
-          <Description>{environment.description}</Description>
-        )}
-        <div className="text-xs text-muted text-right">
-          <TimeAgo date={environment.created_at} />
-        </div>
+      <div className="flex gap-2 font-mono text-lg items-center">
+        <IconCode className="h-6 w-auto" />
+        {environment.name}
+      </div>
+
+      {environment.description && (
+        <Description>{environment.description}</Description>
+      )}
+      <div className="flex grow justify-end items-end text-xs font-mono text-muted">
+        <TimeAgo date={environment.created_at} />
       </div>
     </Link>
   );
