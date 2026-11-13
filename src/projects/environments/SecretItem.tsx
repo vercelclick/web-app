@@ -16,6 +16,7 @@ import {
 } from "@/auth/useAuthorization";
 import { useError } from "@/components";
 import { CopyIcon } from "@/components/CopyIcon";
+import { CLOUD_API_BASE_URL, LOCAL_API_BASE_URL } from "@/constants";
 import {
   type ContributorPublicKey,
   type DecryptedSecret,
@@ -28,13 +29,16 @@ import {
 } from "@/core";
 import { useVisibleAction } from "@/hooks";
 import { resolveApiRequest } from "@/utils";
+import { useProjectQuery } from "../queries";
 import { fetchSecretTargets, useEnvironmentQuery } from "./queries";
 
 export function SecretItem({
   definition,
   contributor_values,
 }: SecretWithEncryptedValues) {
+  const project = useProjectQuery(definition.project_id);
   const environment_query = useEnvironmentQuery(
+    project.data?.path ?? null,
     definition.project_id,
     definition.env_name,
   );
@@ -60,9 +64,13 @@ export function SecretItem({
   const get_authorization_params = useAuthorizationParams(error);
 
   const unLock = useCallback(async () => {
-    const params_op = await get_decryption_params("secret decryption", {
-      toast: true,
-    });
+    const params_op = await get_decryption_params(
+      project.data?.path ?? null,
+      "secret decryption",
+      {
+        toast: true,
+      },
+    );
     if (!params_op.ok) {
       return;
     }
@@ -91,7 +99,12 @@ export function SecretItem({
         ?.plain_value ?? "",
     );
     setTagValues(decrypted_secrets.filter((secret) => secret.tag !== "latest"));
-  }, [get_decryption_params, error.catch, contributor_values]);
+  }, [
+    get_decryption_params,
+    error.catch,
+    contributor_values,
+    project.data?.path,
+  ]);
 
   const reset = useCallback(() => {
     setTagValues(undefined);
@@ -125,6 +138,10 @@ export function SecretItem({
             body: JSON.stringify({
               comments: updated_comments,
             } satisfies UpdateSecretRequest),
+            base_url:
+              (project.data?.path ?? null) === null
+                ? CLOUD_API_BASE_URL
+                : LOCAL_API_BASE_URL,
           },
         ),
       { toast: true },
@@ -152,6 +169,7 @@ export function SecretItem({
     environment_query.refetch,
     error.catch,
     updated_comments,
+    project.data?.path,
   ]);
 
   const updateSecretValue = useCallback(async () => {
@@ -159,9 +177,14 @@ export function SecretItem({
       return;
     }
     const [challenge_op, targets_op] = await Promise.all([
-      get_authorization_params("updating secret value", { toast: true }),
+      get_authorization_params(
+        project.data?.path ?? null,
+        "updating secret value",
+        { toast: true },
+      ),
       error.catch("Error fetching secret target keys", () =>
         fetchSecretTargets(
+          project.data?.path ?? null,
           definition.project_id,
           definition.name,
           definition.project_id,
@@ -202,6 +225,10 @@ export function SecretItem({
               auth_result: encryption_op.result.auth_result,
               encrypted_values: encryption_op.result.encrypted_values,
             } satisfies UpdateSecretValueRequest),
+            base_url:
+              (project.data?.path ?? null) === null
+                ? CLOUD_API_BASE_URL
+                : LOCAL_API_BASE_URL,
           },
         ),
       { toast: true },
@@ -247,6 +274,7 @@ export function SecretItem({
     environment_query.refetch,
     updated_value,
     latest_value,
+    project.data?.path,
   ]);
 
   const ref = useRef<HTMLDivElement | null>(null);

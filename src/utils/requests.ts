@@ -1,3 +1,4 @@
+import { ABORT_ERROR } from "@/components/error";
 import { CLOUD_API_BASE_URL, CONNECTION_REFUSED_ERR } from "@/constants";
 import { getSession } from "./session";
 
@@ -24,6 +25,7 @@ export async function makeApiRequest<T = unknown>(
       ...init,
       headers,
       mode: "cors",
+      credentials: "omit",
     },
   );
 
@@ -56,6 +58,9 @@ export async function resolveApiRequest<T = unknown>(
 
     return Promise.reject(response.text);
   } catch (_err) {
+    if (init?.signal?.aborted) {
+      return Promise.reject(ABORT_ERROR);
+    }
     return Promise.reject(CONNECTION_REFUSED_ERR);
   }
 }

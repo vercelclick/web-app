@@ -1,9 +1,20 @@
-import { Button, Separator } from "@heroui/react";
-import { IconRefresh } from "@tabler/icons-react";
-import { Alert } from "@/components";
+import { Button, Separator, Tooltip } from "@heroui/react";
+import {
+  IconCloud,
+  IconDeviceLaptop,
+  type TablerIcon,
+} from "@tabler/icons-react";
+import type { UseQueryResult } from "@tanstack/react-query";
+import clsx from "clsx";
+import { useMemo } from "react";
+import { Alert, LoadingIcon } from "@/components";
 import { PageHeader } from "@/components/sections/header";
 import { Shimmer } from "@/components/shimmer";
-import { useProjectsListQuery } from "@/projects";
+import { CLOUD_API_BASE_URL, LOCAL_API_BASE_URL } from "@/constants";
+import {
+  useCloudProjectsListQuery,
+  useLocalProjectsListQuery,
+} from "@/projects";
 import { HelpTopicList } from "./help";
 import { PasskeysList } from "./PasskeysList";
 import { InaccessibleProjectsList } from "./projects/inaccessible";
@@ -12,73 +23,132 @@ import { PendingProjectsList } from "./projects/pending";
 import { RunnerDialog } from "./run";
 
 export function HomeDashboard() {
-  const projects_list = useProjectsListQuery();
+  const local_projects = useLocalProjectsListQuery();
+  const cloud_projects = useCloudProjectsListQuery();
+
+  const isPending = useMemo(
+    () => local_projects.isPending && cloud_projects.isPending,
+    [local_projects.isPending, cloud_projects.isPending],
+  );
+
+  const projects = useMemo(
+    () => [
+      ...(local_projects.data?.projects ?? []),
+      ...(cloud_projects.data?.projects ?? []),
+    ],
+    [cloud_projects.data, local_projects.data],
+  );
+
+  const pending = useMemo(
+    () => [...(local_projects.data?.pending ?? [])],
+    [local_projects.data],
+  );
+  const inaccessible = useMemo(
+    () => [...(local_projects.data?.inaccessible ?? [])],
+    [local_projects.data],
+  );
 
   return (
     <div className="content mx-auto container">
       <PageHeader title="Home" className="sticky-below-nav">
-        <Button
-          isIconOnly
-          isDisabled={projects_list.isFetching}
-          variant="ghost"
-          onClick={() => projects_list.refetch()}
-        >
-          <IconRefresh className="size-6" />
-        </Button>
+        <StatusButton
+          query={local_projects}
+          Icon={IconDeviceLaptop}
+          title={LOCAL_API_BASE_URL}
+        />
+        <StatusButton
+          query={cloud_projects}
+          Icon={IconCloud}
+          title={CLOUD_API_BASE_URL}
+        />
       </PageHeader>
 
-      {projects_list.isError && (
+      {cloud_projects.isError && (
         <Alert
           status="warning"
           title={`Error loading projects list`}
           className="my-8 shadow-none"
-          action={<Button variant="ghost">Retry</Button>}
         >
-          {projects_list.error.message}
+          {String(cloud_projects.error)}
         </Alert>
       )}
 
-      <Shimmer className="h-32" active={projects_list.isPending}>
-        {projects_list.isSuccess && (
-          <ProjectsList projects={projects_list.data.projects} />
-        )}
+      <Shimmer className="h-32" active={isPending}>
+        <ProjectsList projects={projects} />
       </Shimmer>
 
-      <Shimmer className="h-32" active={projects_list.isPending}>
-        {projects_list.isSuccess && (
-          <PendingProjectsList paths={projects_list.data.pending} />
-        )}
+      <Shimmer className="h-32" active={isPending}>
+        <PendingProjectsList paths={pending} />
       </Shimmer>
 
-      <Shimmer className="h-32" active={projects_list.isPending}>
+      <Shimmer className="h-32" active={isPending}>
         <PasskeysList />
       </Shimmer>
 
       <Shimmer
         className="h-32"
-        active={projects_list.isPending}
-        hidden={!projects_list.data?.inaccessible.length}
+        active={isPending}
+        hidden={inaccessible.length === 0}
       >
-        {projects_list.isSuccess && (
-          <InaccessibleProjectsList
-            projects={projects_list.data.inaccessible}
-          />
-        )}
+        <InaccessibleProjectsList projects={inaccessible} />
       </Shimmer>
 
-      {!projects_list.isPending && (
-        <div className="my-8">
-          <div className="flex gap-8 mb-6 items-center">
-            <Separator className="flex-1" />
-            <div className="text-muted">Missing something?</div>
-            <Separator className="flex-1" />
-          </div>
-
-          <HelpTopicList />
+      <div className="my-8">
+        <div className="flex gap-8 mb-6 items-center">
+          <Separator className="flex-1" />
+          <div className="text-muted">Missing something?</div>
+          <Separator className="flex-1" />
         </div>
-      )}
+
+        <HelpTopicList />
+      </div>
 
       <RunnerDialog />
     </div>
+  );
+}
+
+function StatusButton({
+  query,
+  title,
+  Icon,
+}: {
+  query: UseQueryResult;
+  title: string;
+  Icon: TablerIcon;
+}) {
+  return (
+    <Tooltip shouldSkipAnimation delay={0}>
+      <Button
+        isIconOnly
+        isDisabled={query.isFetching}
+        variant="ghost"
+        onClick={() => query.refetch()}
+      >
+        <LoadingIcon
+          Icon={Icon}
+          className={clsx(
+            "size-6",
+            query.isError && "text-danger",
+            query.isSuccess && "text-success",
+          )}
+          loading={query.isFetching}
+        />
+      </Button>
+      <Tooltip.Content showArrow placement="bottom">
+        <Tooltip.Arrow />
+        <Alert
+          title={<div className="text-sm font-bold font-mono">{title}</div>}
+          status={
+            query.isSuccess ? "success" : query.isError ? "danger" : "default"
+          }
+          className="shadow-none"
+        >
+          {query.isError && String(query.error)}
+          {query.isSuccess && "CONNECTED"}
+          {query.isPending && "Pending"}
+        </Alert>
+      </Tooltip.Content>
+    </Tooltip>
   );
 }

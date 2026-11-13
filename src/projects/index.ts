@@ -1,1 +1,4 @@
-export { PROJECT_LIST_QUERY_KEY, useProjectsListQuery } from "./queries";
+export {
+  useCloudProjectsListQuery,
+  useLocalProjectsListQuery,
+} from "./queries";

@@ -64,7 +64,10 @@ export function CreateAccessKeyDialog({ project_id }: CreateMachineKeyProps) {
       return;
     }
 
-    const params_op = await get_params("key generation");
+    const params_op = await get_params(
+      project_query.data.path,
+      "key generation",
+    );
     if (!params_op.ok) {
       return;
     }

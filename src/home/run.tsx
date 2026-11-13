@@ -14,9 +14,8 @@ import {
   type SecretValue,
   type TargetedPublicKey,
 } from "@/core";
-import { useProjectsListQuery } from "@/projects";
 import { useEnvironmentQuery } from "@/projects/environments/queries";
-import { useProjectQuery } from "@/projects/queries";
+import { useActiveProjectsList, useProjectQuery } from "@/projects/queries";
 import { isSafari } from "@/utils";
 
 interface EncryptionDetails {
@@ -55,9 +54,14 @@ export function RunnerDialog() {
   const [project_id, setProjectId] = useState<string | undefined>(undefined);
   const [env_name, setEnvName] = useState<string | undefined>(undefined);
 
-  const projects = useProjectsListQuery();
+  const projects = useActiveProjectsList();
+
   const project = useProjectQuery(project_id);
-  const environment = useEnvironmentQuery(project_id, env_name);
+  const environment = useEnvironmentQuery(
+    project.data?.path ?? null,
+    project_id,
+    env_name,
+  );
 
   const closeDialog = useCallback(async () => {
     setSearchParams({}, { replace: true });
@@ -70,9 +74,13 @@ export function RunnerDialog() {
       return;
     }
 
-    const params_op = await get_decrypt_params("secret decryption", {
-      capture: "inject_secrets_challenge",
-    });
+    const params_op = await get_decrypt_params(
+      project.data?.path ?? null,
+      "secret decryption",
+      {
+        capture: "inject_secrets_challenge",
+      },
+    );
     if (!params_op.ok) {
       return;
     }
@@ -125,7 +133,14 @@ export function RunnerDialog() {
     if (inject_op.ok) {
       setInjected(true);
     }
-  }, [environment, get_decrypt_params, error.catch, details_query, port]);
+  }, [
+    environment,
+    get_decrypt_params,
+    error.catch,
+    details_query,
+    port,
+    project.data?.path,
+  ]);
 
   return (
     <Modal isOpen={port > 0}>
@@ -168,7 +183,7 @@ export function RunnerDialog() {
                 hidden={!details_query.isEnabled || details_query.isError}
                 className="h-12"
               >
-                {projects.isSuccess && (
+                {projects.error === null && (
                   <>
                     <Select
                       required
@@ -179,12 +194,12 @@ export function RunnerDialog() {
                       description="Select the project to inject secrets from"
                       onChange={setProjectId}
                       placeholder="Select Project..."
-                      items={projects.data.projects.map((project) => ({
+                      items={projects.projects.map((project) => ({
                         label: project.project.name,
                         value: project.project.id,
                       }))}
                     />
-                    {projects.data.projects.length === 0 && (
+                    {projects.projects.length === 0 && (
                       <Alert
                         className="bg-background shadow-none"
                         status="danger"
@@ -196,7 +211,7 @@ export function RunnerDialog() {
                     )}
                   </>
                 )}
-                {projects.error && (
+                {projects.error !== null && (
                   <Alert
                     className="bg-background shadow-none"
                     status="danger"
@@ -209,7 +224,7 @@ export function RunnerDialog() {
 
               <Shimmer
                 active={project.isEnabled && project.isPending}
-                hidden={!project.isEnabled || !projects.isSuccess}
+                hidden={!project.isEnabled || !projects.error}
                 className="h-6"
               >
                 {project.isSuccess && (

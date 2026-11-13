@@ -9,11 +9,11 @@ interface HelpTopicItem {
 
 const HELP_TOPICS: HelpTopicItem[] = [
   {
-    title: "Can't see your project?",
+    title: "Can't see your local project?",
     details: (
       <div>
         Please navigate to the project folder and run{" "}
-        <SimpleMono value="spass local attach" />. This will give secretpass
+        <SimpleMono value="click attach" />. This will give secretpass
         visibility into the project directory.
       </div>
     ),
@@ -23,7 +23,7 @@ const HELP_TOPICS: HelpTopicItem[] = [
     details: (
       <div>
         Please navigate to the target folder and run{" "}
-        <SimpleMono value="spass local attach" />. The project will appear under
+        <SimpleMono value="click attach" />. The project will appear under
         pending projects and you can proceed to complete the set up.
       </div>
     ),
@@ -31,7 +31,7 @@ const HELP_TOPICS: HelpTopicItem[] = [
   {
     title: "Why is my project under pending projects?",
     details:
-      "We're assuming this is a new project, click on it under pending projects to complete setup.",
+      "You attached the folder but the project setup is not completed, click on it under pending projects to complete setup.",
   },
   {
     title: "Why is my project under inaccessible projects?",

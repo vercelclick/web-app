@@ -13,7 +13,7 @@ import clsx from "clsx";
 import { type SubmitEventHandler, useCallback, useState } from "react";
 import * as z from "zod";
 import { ErrorDisplay, useError } from "@/components";
-import { LoadingCircle } from "@/components/loader";
+import { LoadingIcon } from "@/components/loader";
 import { ConfirmationCodeInput, sendEmailChallenge } from "@/components/otp";
 import {
   type AuthTokenResponse,
@@ -141,8 +141,11 @@ export function SignInForm() {
           value="false"
           onClick={signInWithPasskey}
         >
-          {!error.is_pending && <IconFingerprint className="size-5" />}
-          {error.is_pending && <LoadingCircle className="size-5" />}
+          <LoadingIcon
+            Icon={IconFingerprint}
+            loading={error.is_pending}
+            className="size-5"
+          />
           Sign in with a Passkey
         </Button>
       </div>

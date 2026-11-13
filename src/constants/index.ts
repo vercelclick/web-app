@@ -22,12 +22,11 @@ export const SAFE_NAME_SCHEMA = z
   });
 
 export const SESSION_LOCAL_STORAGE_KEY = "click-session";
-export const LOCAL_API_BASE_URL =
-  import.meta.env.VITE_LOCAL_API_BASE_URL ?? "https://localhost:20206";
+export const LOCAL_API_BASE_URL = "https://click.localhost:20206";
 export const CLOUD_API_BASE_URL =
   import.meta.env.VITE_CLOUD_API_BASE_URL ?? "http://localhost:8080";
 
-export const CONNECTION_REFUSED_ERR = "CONNECTION_REFUSED_ERROR";
+export const CONNECTION_REFUSED_ERR = "CONNECTION_REFUSED";
 export const APP_VERSION = import.meta.env.VITE_APP_VERSION ?? "0.2.1";
 
 export const ENVIRONMENT_ALL_ACCESS = "$ALL$";

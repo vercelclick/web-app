@@ -5,6 +5,7 @@ import {
   authorize_operation,
   type DecryptionAuthorizationRequest,
   type PrfDeriveConfig,
+  type ProjectPath,
 } from "@/core";
 import { generateWebauthnAuthorizeChallenge } from "@/utils/challenge";
 import { useSession } from "./session.provider";
@@ -18,11 +19,15 @@ export function useAuthorizationParams(error: ErrorHook) {
   );
 
   const compileParams = useCallback(
-    async (operation: string, options?: CatchOptions) =>
+    async (
+      project_path: ProjectPath | null,
+      operation: string,
+      options?: CatchOptions,
+    ) =>
       error.catch(
         `Error generating ${operation} challenge`,
         () =>
-          generateWebauthnAuthorizeChallenge().then(
+          generateWebauthnAuthorizeChallenge(project_path).then(
             ({ challenge }) =>
               ({
                 challenge,
@@ -54,11 +59,15 @@ export function useDecryptionParams(error: ErrorHook) {
   );
 
   const compileParams = useCallback(
-    async (operation: string, options?: CatchOptions) =>
+    async (
+      project_path: ProjectPath | null,
+      operation: string,
+      options?: CatchOptions,
+    ) =>
       error.catch(
         `Error generating ${operation} challenge`,
         () =>
-          generateWebauthnAuthorizeChallenge().then(
+          generateWebauthnAuthorizeChallenge(project_path).then(
             ({ challenge }) =>
               ({
                 challenge,
@@ -77,8 +86,12 @@ export function useAuthorization(error: ErrorHook) {
   const compileParams = useAuthorizationParams(error);
 
   const authorize = useCallback(
-    async (operation: string, options?: CatchOptions) => {
-      const params_op = await compileParams(operation);
+    async (
+      project_path: ProjectPath | null,
+      operation: string,
+      options?: CatchOptions,
+    ) => {
+      const params_op = await compileParams(project_path, operation);
       if (!params_op.ok) {
         return params_op;
       }

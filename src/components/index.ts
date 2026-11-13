@@ -2,7 +2,7 @@ export { Alert, type AlertProps } from "./alert";
 export { CommandDisplay } from "./command";
 export { DropdownItem, type DropdownItemProps } from "./dropdown";
 export { ErrorDisplay, type ErrorValue, useError } from "./error";
-export { LoadingBar, LoadingCircle, LoadingIcon } from "./loader";
+export { LoadingBar, LoadingIcon } from "./loader";
 export {
   EnvironmentSelector,
   Select,

@@ -51,7 +51,7 @@ function PasskeyItem({ passkey }: { passkey: Passkey }) {
   const onVerify = useCallback(async () => {
     const challenge_op = await error.catch(
       "Error creating challenge",
-      () => generateWebauthnAuthorizeChallenge(),
+      () => generateWebauthnAuthorizeChallenge(null),
       { toast: true },
     );
 

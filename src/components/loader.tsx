@@ -1,21 +1,6 @@
-import {
-  ProgressBar,
-  type ProgressBarProps,
-  ProgressCircle,
-  type ProgressCircleProps,
-} from "@heroui/react";
-import type { TablerIcon } from "@tabler/icons-react";
-
-export function LoadingCircle(props: ProgressCircleProps) {
-  return (
-    <ProgressCircle {...props}>
-      <ProgressCircle.Track>
-        <ProgressCircle.TrackCircle />
-        <ProgressCircle.FillCircle />
-      </ProgressCircle.Track>
-    </ProgressCircle>
-  );
-}
+import { ProgressBar, type ProgressBarProps } from "@heroui/react";
+import { IconRefresh, type TablerIcon } from "@tabler/icons-react";
+import clsx from "clsx";
 
 export function LoadingBar(props: ProgressBarProps) {
   return (
@@ -40,7 +25,7 @@ export function LoadingIcon({
   return (
     <>
       {!loading && <Icon className={className} />}
-      {loading && <LoadingCircle className={className} />}
+      {loading && <IconRefresh className={clsx("animate-spin", className)} />}
     </>
   );
 }

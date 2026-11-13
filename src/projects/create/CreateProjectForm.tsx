@@ -1,15 +1,21 @@
 import { toast } from "@heroui/react";
 import { useForm } from "@tanstack/react-form";
-import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router";
 import * as uuid from "uuid";
 import * as z from "zod";
 import { useAuthorization } from "@/auth/useAuthorization";
 import type { ErrorHook } from "@/components/error";
-import { SAFE_NAME_SCHEMA } from "@/constants";
-import type { CreateProjectRequest, Project } from "@/core";
+import {
+  CLOUD_API_BASE_URL,
+  LOCAL_API_BASE_URL,
+  SAFE_NAME_SCHEMA,
+} from "@/constants";
+import type { CreateProjectRequest, Project, ProjectPath } from "@/core";
 import { resolveApiRequest } from "@/utils";
-import { PROJECT_LIST_QUERY_KEY } from "../queries";
+import {
+  useCloudProjectsListQuery,
+  useLocalProjectsListQuery,
+} from "../queries";
 
 const createEnvironmentSchema = z.object({
   id: z.string(),
@@ -39,10 +45,11 @@ const create_project_schema = z.object({
 
 export type CreateProjectFormData = z.infer<typeof create_project_schema>;
 
-export function useCreateProjectForm(path: string | null, error: ErrorHook) {
+export function useCreateProjectForm(error: ErrorHook) {
   const authorize = useAuthorization(error);
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
+  const cloud_projects = useCloudProjectsListQuery();
+  const local_projects = useLocalProjectsListQuery();
 
   const form = useForm({
     defaultValues: {
@@ -70,23 +77,28 @@ export function useCreateProjectForm(path: string | null, error: ErrorHook) {
       onChange: create_project_schema,
       onMount: create_project_schema,
     },
-    onSubmitMeta: {} as { path: string | null },
-    onSubmit: async ({ value: { description, environments, name } }) => {
-      const auth_op = await authorize("project creation");
+    onSubmitMeta: {} as { project_path: ProjectPath | null },
+    onSubmit: async ({
+      value: { description, environments, name },
+      meta: { project_path },
+    }) => {
+      const auth_op = await authorize(project_path, "project creation");
       if (!auth_op.ok) {
         return;
       }
 
       const create_op = await error.catch("Error creating project", () =>
-        resolveApiRequest<Project>("/api/projects", {
+        resolveApiRequest<Project>("/api/v1/projects", {
           method: "POST",
           body: JSON.stringify({
-            path,
+            path: project_path?.path ?? null,
             name,
             description,
             environments,
             auth_result: auth_op.result,
           } satisfies CreateProjectRequest),
+          base_url:
+            project_path === null ? CLOUD_API_BASE_URL : LOCAL_API_BASE_URL,
         }),
       );
 
@@ -94,10 +106,12 @@ export function useCreateProjectForm(path: string | null, error: ErrorHook) {
         return;
       }
 
+      await Promise.allSettled([
+        cloud_projects.refetch(),
+        local_projects.refetch(),
+      ]).then(() => navigate(`/p/${create_op.result.id}`));
+
       toast(`Project '${name}' created successfully!`, { variant: "success" });
-      queryClient
-        .invalidateQueries({ queryKey: PROJECT_LIST_QUERY_KEY })
-        .then(() => navigate(`/p/${create_op.result.id}`));
     },
   });
 

@@ -28,3 +28,6 @@ dist-ssr
 src/core
 
 /**/.DS_Store
+
+# Local vault during development
+/.click-dev

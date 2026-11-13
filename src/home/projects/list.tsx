@@ -14,7 +14,7 @@ export function ProjectsList({ projects }: { projects: ProjectListItem[] }) {
         <Link to="/new">
           <Button variant={projects.length === 0 ? "primary" : "ghost"}>
             <IconPlus className={projects.length === 0 ? "" : "text-accent"} />
-            Create a new project
+            Create cloud project
           </Button>
         </Link>
       </SectionHeader>
@@ -26,10 +26,10 @@ export function ProjectsList({ projects }: { projects: ProjectListItem[] }) {
             title="Create, attach or request access to projects"
           >
             You don't have access to any projects at the moment; you can attach
-            a project by running <SimpleMono value="spass local attach" /> in
-            the desired project directory, select create a new project to create
-            a cloud project. To access an existing project, request your admin
-            to invite you to an existing project.
+            a local project by running <SimpleMono value="spass local attach" />{" "}
+            or, select <Link to="/new">create cloud project</Link>. To access an
+            existing project, request your admin to invite you to an existing
+            project.
           </Alert>
         )}
 

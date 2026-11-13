@@ -1,6 +1,7 @@
 import {
+  IconCloud,
+  IconDeviceLaptop,
   IconHome,
-  IconShieldHalfFilled,
   type ReactNode,
 } from "@tabler/icons-react";
 import { useParams } from "react-router";
@@ -37,7 +38,7 @@ export function ProjectLayout({
           items={[
             { Icon: IconHome, to: "/", label: "Home" },
             {
-              Icon: IconShieldHalfFilled,
+              Icon: result.data?.path === null ? IconCloud : IconDeviceLaptop,
               to: `/p/${project_id}`,
               label: result.data?.project.name ?? "Project not found",
             },

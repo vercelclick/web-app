@@ -2,6 +2,7 @@ import { IconCode } from "@tabler/icons-react";
 import { useParams } from "react-router";
 import { Alert, ErrorDisplay } from "@/components";
 import { ProjectLayout } from "../ProjectLayout";
+import { useProjectQuery } from "../queries";
 import { CreateSecretDialog } from "./CreateSecret";
 import { useEnvironmentQuery } from "./queries";
 import { SecretItem } from "./SecretItem";
@@ -12,7 +13,13 @@ export function EnvironmentDashboard() {
     project_id: string;
   }>();
 
-  const query = useEnvironmentQuery(project_id ?? "", env_name ?? "");
+  const project = useProjectQuery(project_id);
+
+  const query = useEnvironmentQuery(
+    project.data?.path ?? null,
+    project_id,
+    env_name,
+  );
 
   return (
     <ProjectLayout
@@ -41,7 +48,7 @@ export function EnvironmentDashboard() {
         />
       )}
 
-      {!query.data?.secrets.length && !query.isPending && (
+      {!query.data?.secrets.length && !query.isPending && !query.isError && (
         <Alert title={`You have no secrets under this environment`}>
           Click create secret to create your first secret.
         </Alert>

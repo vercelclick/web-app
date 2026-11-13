@@ -15,9 +15,14 @@ import * as z from "zod";
 import { useAuthorizationParams } from "@/auth/useAuthorization";
 import { ErrorDisplay, useError } from "@/components";
 import { SimpleMono } from "@/components/command";
-import { SAFE_NAME_SCHEMA } from "@/constants";
+import {
+  CLOUD_API_BASE_URL,
+  LOCAL_API_BASE_URL,
+  SAFE_NAME_SCHEMA,
+} from "@/constants";
 import { type CreateSecretRequest, encrypt_secret } from "@/core";
 import { resolveApiRequest } from "@/utils";
+import { useProjectQuery } from "../queries";
 import { fetchSecretTargets, useEnvironmentQuery } from "./queries";
 
 interface CreateSecretProps {
@@ -35,10 +40,15 @@ export function CreateSecretDialog({
   env_name,
   project_id,
 }: CreateSecretProps) {
+  const project = useProjectQuery(project_id);
   const [open, setOpen] = useState(false);
   const error = useError();
   const authParams = useAuthorizationParams(error);
-  const query = useEnvironmentQuery(project_id, env_name);
+  const query = useEnvironmentQuery(
+    project.data?.path ?? null,
+    project_id,
+    env_name,
+  );
 
   const form = useForm({
     defaultValues: {
@@ -49,9 +59,14 @@ export function CreateSecretDialog({
     validators: { onChange: new_secret_schema, onMount: new_secret_schema },
     onSubmit: async ({ value, formApi }) => {
       const [params_op, targets_op] = await Promise.all([
-        authParams("secret creation"),
+        authParams(project.data?.path ?? null, "secret creation"),
         error.catch("Error fetching secret target keys", () =>
-          fetchSecretTargets(project_id, env_name, value.name),
+          fetchSecretTargets(
+            project.data?.path ?? null,
+            project_id,
+            env_name,
+            value.name,
+          ),
         ),
       ]);
       if (!params_op.ok || !targets_op.ok) {
@@ -84,6 +99,10 @@ export function CreateSecretDialog({
               name: value.name,
               encrypted_values: encrypt_op.result.encrypted_values,
             } satisfies CreateSecretRequest),
+            base_url:
+              (project.data?.path ?? null) === null
+                ? CLOUD_API_BASE_URL
+                : LOCAL_API_BASE_URL,
           },
         ),
       );
