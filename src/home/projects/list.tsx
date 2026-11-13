@@ -1,11 +1,19 @@
 import { Button, IconPlus } from "@heroui/react";
-import { IconFolder, IconShieldHalfFilled } from "@tabler/icons-react";
+import {
+  IconClock,
+  IconCloud,
+  IconDeviceLaptop,
+  IconFolder,
+  IconShieldHalfFilled,
+} from "@tabler/icons-react";
 import clsx from "clsx";
 import { Link } from "react-router";
+import TimeAgo from "react-timeago";
 import { Alert } from "@/components";
 import { SimpleMono } from "@/components/command";
 import { SectionHeader } from "@/components/sections/header";
 import type { Project, ProjectListItem, ProjectPath } from "@/core";
+import { useUuidTimestamp } from "@/utils/uuid";
 
 export function ProjectsList({ projects }: { projects: ProjectListItem[] }) {
   return (
@@ -52,30 +60,45 @@ export function ProjectCard({
   path: ProjectPath | null;
   inaccessible?: boolean;
 }) {
+  const created_at = useUuidTimestamp(project.id);
   return (
     <Link
       to={`/p/${project.id}`}
       className={clsx(
-        "bg-background p-4 rounded-xl flex gap-4 items-start",
+        "bg-background px-4 pt-4 pb-2 rounded-xl flex gap-4 items-start",
         inaccessible && "text-muted",
         !inaccessible && "hover:bg-background-secondary",
       )}
     >
-      <IconShieldHalfFilled
-        className={clsx("size-6", inaccessible ? "" : "text-accent")}
-      />
+      {path !== null && (
+        <IconDeviceLaptop
+          className={clsx("size-6", inaccessible ? "" : "text-accent")}
+        />
+      )}
+      {path === null && <IconCloud className="size-6 text-accent" />}
       <div className="flex flex-col gap-2 grow">
-        <div className="font-semibold">{project.name}</div>
+        <div
+          className={clsx("font-semibold", inaccessible ? "" : "text-accent")}
+        >
+          {project.name}
+        </div>
         {project.description && (
           <div className="text-xs text-muted">{project.description}</div>
         )}
 
-        {path !== null && (
-          <div className="flex justify-end text-xs font-mono items-center text-muted">
-            <IconFolder className="size-4" />
-            {path.short_path}
+        <div className="flex justify-between items-end grow text-xs font-mono text-muted">
+          <div className="flex gap-1 font-mono items-end">
+            <IconClock className="size-4" />
+            <TimeAgo date={created_at} />
           </div>
-        )}
+
+          {path !== null && (
+            <div className="flex gap-1 font-mono items-end">
+              <IconFolder className="size-4" />
+              {path.short_path}
+            </div>
+          )}
+        </div>
       </div>
     </Link>
   );

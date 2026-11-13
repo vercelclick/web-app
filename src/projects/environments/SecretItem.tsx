@@ -132,7 +132,7 @@ export function SecretItem({
       "Error updating secret",
       () =>
         resolveApiRequest(
-          `/api/projects/${definition.project_id}/env/${definition.env_name}/secrets/${definition.name}`,
+          `/api/v1/projects/${definition.project_id}/env/${definition.env_name}/secrets/${definition.name}`,
           {
             method: "PATCH",
             body: JSON.stringify({
@@ -218,7 +218,7 @@ export function SecretItem({
       "Error updating secret",
       () =>
         resolveApiRequest(
-          `/api/projects/${definition.project_id}/env/${definition.env_name}/secrets/${definition.name}/value`,
+          `/api/v1/projects/${definition.project_id}/env/${definition.env_name}/secrets/${definition.name}/value`,
           {
             method: "PATCH",
             body: JSON.stringify({

@@ -50,7 +50,7 @@ export const fetchSecretTargets = async (
   secret_name?: string,
 ) =>
   resolveApiRequest<TargetedPublicKey[]>(
-    `/api/projects/${project_id}/env/${env_name}/secrets/${secret_name}/targets`,
+    `/api/v1/projects/${project_id}/env/${env_name}/secrets/${secret_name}/targets`,
     {
       base_url: project_path === null ? CLOUD_API_BASE_URL : LOCAL_API_BASE_URL,
     },

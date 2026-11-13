@@ -90,7 +90,7 @@ export function CreateSecretDialog({
 
       const create_op = await error.catch("Error creating secret", () =>
         resolveApiRequest(
-          `/api/projects/${project_id}/env/${env_name}/secrets`,
+          `/api/v1/projects/${project_id}/env/${env_name}/secrets`,
           {
             method: "POST",
             body: JSON.stringify({
