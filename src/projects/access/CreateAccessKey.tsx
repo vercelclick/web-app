@@ -42,7 +42,7 @@ export function CreateAccessKeyDialog({ project_id }: CreateMachineKeyProps) {
   const error = useError();
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
-  const [is_federated, setIsFederated] = useState(true);
+  const [is_federated, setIsFederated] = useState(false);
   const [generated_key, setGeneratedKey] = useState<string | null>(null);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -195,7 +195,11 @@ export function CreateAccessKeyDialog({ project_id }: CreateMachineKeyProps) {
                 >
                   <Label>Access Key Type</Label>
                   {KEY_ITEMS.map((item) => (
-                    <Radio key={item.value} value={item.value}>
+                    <Radio
+                      key={item.value}
+                      value={item.value}
+                      isDisabled={item.value === "federated"}
+                    >
                       <Radio.Content
                         className={clsx(
                           "group relative flex flex-col px-4 py-4 rounded-2xl text-justify items-start bg-background",
@@ -322,7 +326,7 @@ const KEY_ITEMS: {
   description: string;
 }[] = [
   {
-    label: "Federated Access Key (recommended)",
+    label: "Federated Access Key (work in progress)",
     description:
       "These access keys generate short-live private keys on demand, the user remotely approves and shares encrypted values for this key, the key is discarded after use.",
     Icon: IconShieldCheckeredFilled,
