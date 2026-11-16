@@ -113,7 +113,7 @@ export function RunnerDialog() {
     }
 
     const inject_op = await error.catch(
-      "Error transmitting secrets to spass cli",
+      "Error transmitting secrets to click cli",
       async () => {
         const response = await fetch(`https://localhost:${port}/commit`, {
           method: "POST",
@@ -289,12 +289,12 @@ export function RunnerDialog() {
                   <ul className="list-disc pl-5">
                     <li>
                       You'll use your passkey to decrypt secrets then encrypt
-                      them with a one time <SimpleMono value="spass cli" />{" "}
+                      them with a one time <SimpleMono value="click cli" />{" "}
                       public key
                     </li>
                     <li>
                       Encrypted secrets will be passed to{" "}
-                      <SimpleMono value="spass cli" /> and decrypted
+                      <SimpleMono value="click cli" /> and decrypted
                     </li>
                     <li>
                       {!details_query.data.command && (
@@ -320,7 +320,7 @@ export function RunnerDialog() {
                   status="success"
                   title={
                     <>
-                      Secrets passed to <SimpleMono value="spass cli" />!
+                      Secrets passed to <SimpleMono value="click cli" />!
                     </>
                   }
                   className="bg-background shadow-none"
@@ -336,7 +336,7 @@ export function RunnerDialog() {
                   status="danger"
                   className="bg-background shadow-none"
                 >
-                  We faced an issue attempting to communicate with spass client
+                  We faced an issue attempting to communicate with click client
                   over{" "}
                   <SimpleMono value={`https://localhost:${port}/details`} />,
                   this is a random endpoint for this command only please ensure
@@ -347,8 +347,8 @@ export function RunnerDialog() {
                       <br />
                       <br />
                       For Safari user's, Safari may block local TLS certificates
-                      used by secretpass cli. You can fix this by running{" "}
-                      <SimpleMono value="spass install-certificates" />
+                      used by click local vault. You can fix this by running{" "}
+                      <SimpleMono value="click service install-certificates" />
                     </>
                   )}
                 </Alert>

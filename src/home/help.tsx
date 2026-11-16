@@ -13,7 +13,7 @@ const HELP_TOPICS: HelpTopicItem[] = [
     details: (
       <div>
         Please navigate to the project folder and run{" "}
-        <SimpleMono value="click attach" />. This will give secretpass
+        <SimpleMono value="click attach" />. This will give local click vault
         visibility into the project directory.
       </div>
     ),

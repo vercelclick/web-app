@@ -287,11 +287,11 @@ export function CreateAccessKeyDialog({ project_id }: CreateMachineKeyProps) {
                       </p>
                       <SimpleMono
                         className="wrap-break-word"
-                        value={`spass run --[local/cloud] --private-key=${generated_key} --env=${environments[0]} -- your command here`}
+                        value={`click run --access-key=${generated_key} --env=${environments[0]} -- your command here`}
                       />
                       <SimpleMono
                         className="wrap-break-word"
-                        value={`spass export --[local/cloud] --private-key=${generated_key} --env=${environments[0]}{" "} --format=[json/dot-env]`}
+                        value={`click export --access-key=${generated_key} --env=${environments[0]}{" "} --format=[json/.env]`}
                       />
                     </div>
                   </Alert>

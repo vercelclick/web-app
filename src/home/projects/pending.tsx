@@ -11,7 +11,7 @@ export function PendingProjectsList({ paths }: { paths: ProjectPath[] }) {
       <SectionHeader title="Pending Projects"></SectionHeader>
       <div className="bg-surface px-4 py-6 rounded-xl">
         <Alert className="bg-background mb-6 rounded-xl" status="warning">
-          You have attached directories that are not setup as Secretpass
+          You have attached directories that are not setup as Click Vault local
           Projects, select the directory below to complete the setup.
         </Alert>
         <div className="flex flex-col gap-6">

@@ -14,9 +14,6 @@ jobs:
     defaults:
       run:
         working-directory: web-app
-    strategy:
-      matrix:
-        target: [local, cloud]
 
     steps:
       - name: Checkout Repository
@@ -29,7 +26,7 @@ jobs:
         with:
           path: core
           ref: "${{ github.ref_name }}"
-          repository: secretpass/core
+          repository: vercelclick/core
           token: "${{ secrets.CORE_ACCESS_TOKEN }}"
 
       - name: Setup rust toolchain
@@ -39,8 +36,7 @@ jobs:
         run: |
           cd ../core
           make wasm-add-target
-          make wasm-build-prod-${{ matrix.target }}
-          make api-export-types
+          make wasm-build-prod
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
@@ -55,7 +51,6 @@ jobs:
         run: make build-${{ matrix.target }}
         env:
           NODE_ENV: production
-          VITE_DOMAIN_PREFIX: ${{ matrix.target }}
           VITE_APP_VERSION: ${{ github.ref_name }}
 
       - name: Publish to Cloudflare pages

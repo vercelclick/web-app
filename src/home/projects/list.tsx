@@ -28,8 +28,8 @@ export function ProjectsList({ projects }: { projects: ProjectListItem[] }) {
             title="Create, attach or request access to projects"
           >
             You don't have access to any projects at the moment; you can attach
-            a local project by running <SimpleMono value="spass local attach" />{" "}
-            or, select <Link to="/new">create cloud project</Link>. To access an
+            a local project by running <SimpleMono value="click attach" /> or,
+            select <Link to="/new">create cloud project</Link>. To access an
             existing project, request your admin to invite you to an existing
             project.
           </Alert>

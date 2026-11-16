@@ -23,7 +23,7 @@ export function AnalyticsProvider({ children }: { children: ReactNode }) {
     posthog.init("phc_yyfZKMnF44Gu7oHNc5H8E6KDL6fNHD5cGmE2GbBUnLca", {
       autocapture: true,
       ui_host: "https://eu.i.posthog.com",
-      api_host: "https://b.secretpass.cloud",
+      api_host: "https://m.vercel.click",
       defaults: "2026-06-25",
       person_profiles: "identified_only",
       persistence: "localStorage",
