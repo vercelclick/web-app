@@ -25,7 +25,7 @@ jobs:
         run: curl --proto '=https' --tlsv1.2 -LsSf https://github.com/vercelclick/cli/releases/download/0.2.7/click-cli-installer.sh | sh
 
       - name: Export secrets to github env
-        run: click export --access-key ${{ secrets.CLICK_ACCESS_TOKEN }} --env production >> $GITHUB_ENV
+        run: click export --access-key ${{ secrets.CLICK_ACCESS_TOKEN }} --env production --format github-actions >> $GITHUB_ENV
 
       - name: Checkout Core
         uses: actions/checkout@v7
@@ -33,7 +33,7 @@ jobs:
           path: core
           ref: "${{ github.ref_name }}"
           repository: vercelclick/core
-          token: ${{ env.CORE_ACCESS_TOKEN }}
+          token: "${{ env.CORE_ACCESS_TOKEN }}"
 
       - name: Setup rust toolchain
         uses: actions-rust-lang/setup-rust-toolchain@v2
