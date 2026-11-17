@@ -33,7 +33,7 @@ jobs:
           path: core
           ref: "${{ github.ref_name }}"
           repository: vercelclick/core
-          token: "${{ env.CORE_ACCESS_TOKEN }}"
+          token: ${{ env.CORE_ACCESS_TOKEN }}
 
       - name: Setup rust toolchain
         uses: actions-rust-lang/setup-rust-toolchain@v2
