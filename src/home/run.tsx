@@ -390,7 +390,9 @@ export function RunnerDialog() {
                   onClick={injectSecrets}
                 >
                   <IconFingerprint className="size-5" />
-                  Inject {environment.data?.secrets?.length || ""} Secrets
+                  {!!details_query.data?.command && "Run with "}
+                  {!details_query.data?.command && "Export "}
+                  {environment.data?.secrets?.length ?? ""} Secrets
                 </Button>
               )}
             </Modal.Footer>
