@@ -1,11 +1,12 @@
-import { Button, IconPlus } from "@heroui/react";
 import { IconUsers } from "@tabler/icons-react";
 import { useParams } from "react-router";
 import { SectionHeader } from "@/components/sections/header";
 import { Shimmer } from "@/components/shimmer";
 import { AccessKeysList } from "../access/AccessKeysList";
+import { CreateEnvironmentDialog } from "../environments/CreateEnvironmentDialog";
 import { ProjectLayout } from "../ProjectLayout";
 import { useProjectQuery } from "../queries";
+import { CreateUserDialog } from "../users/CreateUser";
 import { EnvironmentItem } from "./environment";
 
 export function ProjectHome() {
@@ -20,9 +21,7 @@ export function ProjectHome() {
       actions={
         isSuccess &&
         data.contributor.role === "Admin" && (
-          <Button variant="ghost" size="sm">
-            <IconPlus className="text-accent" /> Create Environment
-          </Button>
+          <CreateEnvironmentDialog project_id={project_id || ""} />
         )
       }
     >
@@ -43,9 +42,7 @@ export function ProjectHome() {
           </>
         }
       >
-        <Button variant="ghost" size="sm">
-          <IconPlus className="text-accent" /> Add User
-        </Button>
+        <CreateUserDialog />
       </SectionHeader>
 
       <Shimmer active={isPending} hidden={isError}>

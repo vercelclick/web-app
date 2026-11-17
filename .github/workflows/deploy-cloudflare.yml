@@ -45,7 +45,7 @@ jobs:
         run: bun install
 
       - name: Build Vite App
-        run: make build
+        run: make build-prod
         env:
           NODE_ENV: production
           VITE_APP_VERSION: ${{ github.ref_name }}

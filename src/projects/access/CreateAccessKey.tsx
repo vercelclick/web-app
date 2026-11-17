@@ -9,16 +9,18 @@ import {
   RadioGroup,
   TextArea,
   TextField,
+  toast,
 } from "@heroui/react";
 import {
   IconFingerprint,
   IconKeyFilled,
+  IconMessage,
   IconShieldCheckeredFilled,
   type TablerIcon,
 } from "@tabler/icons-react";
 import { useQueryClient } from "@tanstack/react-query";
 import clsx from "clsx";
-import { useCallback, useState } from "react";
+import { type ReactNode, useCallback, useState } from "react";
 import { useDecryptionParams } from "@/auth/useAuthorization";
 import { Alert, ErrorDisplay, Select, useError } from "@/components";
 import { SimpleMono } from "@/components/command";
@@ -52,7 +54,7 @@ export function CreateAccessKeyDialog({ project_id }: CreateMachineKeyProps) {
 
   const reset = useCallback(() => {
     error.reset();
-    setIsFederated(true);
+    setIsFederated(false);
     setGeneratedKey(null);
     setName("");
     setDescription("");
@@ -154,7 +156,9 @@ export function CreateAccessKeyDialog({ project_id }: CreateMachineKeyProps) {
       isOpen={open}
       onOpenChange={(isOpen) => {
         setOpen(isOpen);
-        reset();
+        if (!isOpen) {
+          reset();
+        }
       }}
     >
       <Button variant="ghost" size="sm">
@@ -182,6 +186,11 @@ export function CreateAccessKeyDialog({ project_id }: CreateMachineKeyProps) {
                 onSubmit={(evt) => {
                   evt.preventDefault();
                   if (is_federated) {
+                    toast("Work in progress", {
+                      description:
+                        "Our team is working to deliver this feature, please chat with us if you'd like this expedited.",
+                      variant: "warning",
+                    });
                   } else {
                     generateStandardKey();
                   }
@@ -195,11 +204,7 @@ export function CreateAccessKeyDialog({ project_id }: CreateMachineKeyProps) {
                 >
                   <Label>Access Key Type</Label>
                   {KEY_ITEMS.map((item) => (
-                    <Radio
-                      key={item.value}
-                      value={item.value}
-                      isDisabled={item.value === "federated"}
-                    >
+                    <Radio key={item.value} value={item.value}>
                       <Radio.Content
                         className={clsx(
                           "group relative flex flex-col px-4 py-4 rounded-2xl text-justify items-start bg-background",
@@ -214,7 +219,21 @@ export function CreateAccessKeyDialog({ project_id }: CreateMachineKeyProps) {
                           {item.label}
                         </Label>
 
-                        <Description>{item.description}</Description>
+                        <Description>
+                          {item.description}{" "}
+                          {is_federated && item.value === "federated" && (
+                            <div className="mt-2 text-yellow-700">
+                              The team is currently working on this feature, we
+                              apologize for any inconvenience.{" "}
+                              <span className="font-semibold">
+                                If you'd like this feature to be expedited,
+                                please ping us in the chat box{" "}
+                                <IconMessage className="size-4 inline" />,
+                                there's always a human behind the chat.
+                              </span>
+                            </div>
+                          )}
+                        </Description>
                       </Radio.Content>
                     </Radio>
                   ))}
@@ -323,7 +342,7 @@ const KEY_ITEMS: {
   label: string;
   Icon: TablerIcon;
   value: string;
-  description: string;
+  description: ReactNode;
 }[] = [
   {
     label: "Federated Access Key (work in progress)",

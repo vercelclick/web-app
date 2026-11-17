@@ -8,6 +8,7 @@ import { useDecryptionParams } from "@/auth/useAuthorization";
 import { Alert, ErrorDisplay, Select, useError } from "@/components";
 import { SimpleMono } from "@/components/command";
 import { Shimmer } from "@/components/shimmer";
+import { LOCAL_API_ORIGIN } from "@/constants";
 import {
   type ContributorPublicKey,
   reencrypt_package,
@@ -38,9 +39,12 @@ export function RunnerDialog() {
   const details_query = useQuery({
     queryKey: ["command-details"],
     queryFn: async (): Promise<EncryptionDetails> => {
-      const response = await fetch(`https://localhost:${port}/details`, {
-        mode: "cors",
-      });
+      const response = await fetch(
+        `https://${LOCAL_API_ORIGIN}:${port}/details`,
+        {
+          mode: "cors",
+        },
+      );
       if (!response.ok) {
         return Promise.reject(response.text);
       }
@@ -115,14 +119,17 @@ export function RunnerDialog() {
     const inject_op = await error.catch(
       "Error transmitting secrets to click cli",
       async () => {
-        const response = await fetch(`https://localhost:${port}/commit`, {
-          method: "POST",
-          mode: "cors",
-          body: JSON.stringify(secrets_package),
-          headers: {
-            "Content-Type": "application/json",
+        const response = await fetch(
+          `https://${LOCAL_API_ORIGIN}:${port}/commit`,
+          {
+            method: "POST",
+            mode: "cors",
+            body: JSON.stringify(secrets_package),
+            headers: {
+              "Content-Type": "application/json",
+            },
           },
-        });
+        );
 
         if (!response.ok) {
           return Promise.reject(response.text);
@@ -338,10 +345,12 @@ export function RunnerDialog() {
                 >
                   We faced an issue attempting to communicate with click client
                   over{" "}
-                  <SimpleMono value={`https://localhost:${port}/details`} />,
-                  this is a random endpoint for this command only please ensure
-                  the browser has sufficient permissions to communicate with{" "}
-                  <SimpleMono value="localhost" />.
+                  <SimpleMono
+                    value={`https://${LOCAL_API_ORIGIN}:${port}/details`}
+                  />
+                  , this is a random endpoint for this command only please
+                  ensure the browser has sufficient permissions to communicate
+                  with <SimpleMono value={LOCAL_API_ORIGIN} />.
                   {isSafari() && (
                     <>
                       <br />

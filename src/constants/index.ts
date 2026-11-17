@@ -22,7 +22,10 @@ export const SAFE_NAME_SCHEMA = z
   });
 
 export const SESSION_LOCAL_STORAGE_KEY = "click-session";
-export const LOCAL_API_BASE_URL = "https://click.localhost:20206";
+
+export const LOCAL_API_ORIGIN =
+  import.meta.env.VITE_LOCAL_API_ORIGIN ?? "click-dev.localhost";
+export const LOCAL_API_BASE_URL = `https://${LOCAL_API_ORIGIN}:20206`;
 export const CLOUD_API_BASE_URL =
   import.meta.env.VITE_CLOUD_API_BASE_URL ?? "http://localhost:8080";
 

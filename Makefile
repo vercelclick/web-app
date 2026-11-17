@@ -12,8 +12,9 @@ install:
 	@echo "==> Install npm packages"
 	bun install
 
-build:
+build-prod:
 	@echo "==> Build vault UI"
 	NODE_ENV=production \
+	VITE_LOCAL_API_ORIGIN=click.localhost \
 	VITE_CLOUD_API_BASE_URL=https://api.vercel.click \
 	bun run build
