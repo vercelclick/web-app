@@ -14,15 +14,16 @@ import { type SubmitEventHandler, useCallback, useState } from "react";
 import * as z from "zod";
 import { ErrorDisplay, useError } from "@/components";
 import { LoadingIcon } from "@/components/loader";
-import { ConfirmationCodeInput, sendEmailChallenge } from "@/components/otp";
+import { ConfirmationCodeInput } from "@/components/otp";
 import { CLOUD_API_BASE_URL } from "@/constants";
 import {
   type AuthTokenResponse,
   authorize_operation,
+  type EmailChallengeRequest,
   type EmailSignInRequest,
   type PasskeySignInRequest,
 } from "@/core";
-import { resolveApiRequest, updateSessionToken } from "@/utils";
+import { makeApiRequest, resolveApiRequest, updateSessionToken } from "@/utils";
 import { generatePasskeySignInChallenge } from "@/utils/challenge";
 
 const signin_schema = z.object({
@@ -32,7 +33,11 @@ const signin_schema = z.object({
 
 type SignInFormData = z.infer<typeof signin_schema>;
 
-export function SignInForm() {
+interface SignInFormProps {
+  onUserNotFound: (email_address: string) => void;
+}
+
+export function SignInForm(props: SignInFormProps) {
   const error = useError();
   const [started, setStarted] = useState(false);
 
@@ -110,11 +115,37 @@ export function SignInForm() {
         return;
       }
 
-      await error.catch(
-        "Error sending signin code, if not received, please resend",
-        () => sendEmailChallenge("EmailSignIn", email_address),
-        { toast: true },
+      const response = await error.catch("", () =>
+        makeApiRequest("/api/v1/auth/challenge/email", {
+          method: "POST",
+          body: JSON.stringify({
+            kind: "EmailSignIn",
+            owner: email_address,
+          } satisfies EmailChallengeRequest),
+          base_url: CLOUD_API_BASE_URL,
+        }),
       );
+
+      if (!response.ok) {
+        return;
+      }
+
+      if (response.result.status === 400) {
+        // Redirect to signup screen - bad requests for when user's don't exist
+        props.onUserNotFound(email_address);
+        toast("User not found, please create a new account", {
+          variant: "warning",
+        });
+        return;
+      }
+
+      if (!response.result.ok) {
+        toast("Error sending signin code, if not received, please resend", {
+          description: response.result.text,
+          variant: "danger",
+        });
+      }
+
       setStarted(true);
     },
   });
@@ -135,7 +166,7 @@ export function SignInForm() {
 
   return (
     <form className="flex flex-col gap-6" onSubmit={onSubmit}>
-      <div className="flex justify-center my-2">
+      <div className="flex justify-center my-4">
         <Button
           aria-label="Signin with Passkey"
           isDisabled={error.is_pending}
@@ -149,11 +180,11 @@ export function SignInForm() {
             loading={error.is_pending}
             className="size-5"
           />
-          Sign in with a Passkey
+          Proceed with your Passkey
         </Button>
       </div>
 
-      <div className="flex gap-6 items-center">
+      <div className="flex gap-6 items-center text-sm text-muted">
         <Separator className="flex-1" />
         Or
         <Separator className="flex-1" />
@@ -177,8 +208,8 @@ export function SignInForm() {
               onChange={(e) => field.handleChange(e.currentTarget.value)}
             />
             <Description>
-              Use this option if you don't have a passkey registered on this
-              device.
+              Use this option if you're a new user or you don't have a passkey
+              registered on this device.
             </Description>
           </TextField>
         )}
@@ -213,7 +244,7 @@ export function SignInForm() {
             value="true"
           >
             <IconMail className="size-5" />
-            Sign in with Email
+            Proceed with Email
           </Button>
         )}
 
@@ -225,7 +256,7 @@ export function SignInForm() {
             type="submit"
           >
             <IconArrowRight className="size-5" />
-            Complete sign in
+            Sign in
           </Button>
         )}
       </div>

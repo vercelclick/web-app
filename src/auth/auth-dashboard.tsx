@@ -1,10 +1,10 @@
-import { Card, Tabs } from "@heroui/react";
+import { Card } from "@heroui/react";
 import {
   IconArrowUpRight,
   IconFingerprint,
   IconShieldLock,
 } from "@tabler/icons-react";
-import { Activity, useState } from "react";
+import { useState } from "react";
 import { Alert } from "@/components/alert";
 import { SignInForm } from "./SignIn";
 import { SignupForm } from "./signup";
@@ -15,7 +15,7 @@ export enum ActiveView {
 }
 
 export function AuthDashboard() {
-  const [view, setView] = useState<ActiveView>(ActiveView.SignIn);
+  const [signup_email, setSignupEmail] = useState<string | null>(null);
 
   return (
     <main className="content relative isolate flex flex-col items-center justify-center overflow-hidden px-4 py-10 sm:py-14">
@@ -72,42 +72,23 @@ export function AuthDashboard() {
                   Welcome to your vault
                 </div>
                 <Card.Title className="mb-4 text-2xl font-semibold tracking-tight">
-                  Sign in or create account
+                  {signup_email === null && "Sign in or create account"}
+                  {signup_email !== null && "Create account"}
                 </Card.Title>
-                <Tabs
-                  className="w-full"
-                  variant="secondary"
-                  selectedKey={view}
-                  onSelectionChange={(key) => setView(key as ActiveView)}
-                >
-                  <Tabs.ListContainer>
-                    <Tabs.List>
-                      <Tabs.Tab id={ActiveView.SignIn}>
-                        <Tabs.Indicator />
-                        Sign in
-                      </Tabs.Tab>
-                      <Tabs.Tab id={ActiveView.Signup}>
-                        <Tabs.Indicator />
-                        Create Account
-                      </Tabs.Tab>
-                    </Tabs.List>
-                  </Tabs.ListContainer>
-                </Tabs>
               </Card.Header>
 
               <Card.Content className="mt-6">
-                <Activity
-                  mode={view === ActiveView.SignIn ? "visible" : "hidden"}
-                >
-                  <SignInForm />
-                </Activity>
-                <Activity
-                  mode={view === ActiveView.Signup ? "visible" : "hidden"}
-                >
-                  <SignupForm />
-                </Activity>
+                {signup_email === null && (
+                  <SignInForm onUserNotFound={setSignupEmail} />
+                )}
+                {signup_email !== null && (
+                  <SignupForm
+                    email_address={signup_email}
+                    onReset={() => setSignupEmail(null)}
+                  />
+                )}
               </Card.Content>
-              {view === ActiveView.SignIn && (
+              {signup_email === null && (
                 <Card.Footer className="mt-4">
                   <Alert
                     status="warning"

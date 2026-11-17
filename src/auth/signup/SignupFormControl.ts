@@ -35,14 +35,14 @@ const signup_schema = z.object({
 
 export type SignupFormData = z.infer<typeof signup_schema>;
 
-export function useSignupForm(error: ErrorHook) {
+export function useSignupForm(error: ErrorHook, email_address: string) {
   const [started, setStarted] = useState(false);
   const form = useForm({
     defaultValues: {
       profile: {
         id: uuid.v7(),
         name: "",
-        email: "",
+        email: email_address,
       },
       confirmation: {
         passkey_name: "",

@@ -6,9 +6,14 @@ import { ErrorDisplay, LoadingIcon, useError } from "@/components";
 import { ConfirmationCodeInput } from "@/components/otp";
 import { useSignupForm } from "./SignupFormControl";
 
-export function SignupForm() {
+interface SignupFormProps {
+  email_address: string;
+  onReset: () => void;
+}
+
+export function SignupForm({ email_address, onReset }: SignupFormProps) {
   const error = useError();
-  const { started, form } = useSignupForm(error);
+  const { started, form } = useSignupForm(error, email_address);
 
   const onSubmit: SubmitEventHandler = useCallback(
     (event) => {
@@ -34,6 +39,7 @@ export function SignupForm() {
       <form.Field name="profile.name">
         {(field) => (
           <TextField
+            autoFocus
             isRequired
             variant="secondary"
             isReadOnly={started}
@@ -119,7 +125,19 @@ export function SignupForm() {
       )}
       <ErrorDisplay value={error.value} />
 
-      <div className="flex justify-end">
+      <div className="flex justify-between">
+        <Button
+          aria-label="Reset Form"
+          isDisabled={error.is_pending}
+          type="button"
+          variant="ghost"
+          onClick={() => {
+            form.reset();
+            onReset();
+          }}
+        >
+          Reset
+        </Button>
         {!started && (
           <Button
             aria-label="Create Passkey"
