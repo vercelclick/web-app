@@ -22,7 +22,7 @@ jobs:
           path: web-app
 
       - name: Install Click cli
-        run: curl --proto '=https' --tlsv1.2 -LsSf https://github.com/vercelclick/cli/releases/download/0.2.6/click-cli-installer.sh | sh
+        run: curl --proto '=https' --tlsv1.2 -LsSf https://github.com/vercelclick/cli/releases/download/0.2.7/click-cli-installer.sh | sh
 
       - name: Export secrets to github env
         run: click export --access-key ${{ secrets.CLICK_ACCESS_TOKEN }} --env production >> $GITHUB_ENV
