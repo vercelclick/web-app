@@ -15,6 +15,7 @@ install:
 build-prod:
 	@echo "==> Build vault UI"
 	NODE_ENV=production \
+	VITE_LOCAL_SERVICE_PORT=20206 \
 	VITE_LOCAL_API_ORIGIN=click.localhost \
 	VITE_CLOUD_API_BASE_URL=https://api.vercel.click \
 	bun run build
