@@ -61,7 +61,7 @@ export function SectionHeader({
 }
 
 export interface BreadCrumbHeaderProps
-  extends Omit<SectionHeaderProps, "title" | "description"> {
+  extends Omit<SectionHeaderProps, "title"> {
   items: HeaderItem[];
 }
 
@@ -75,6 +75,7 @@ export function BreadCrumbPageHeader({
   className,
   items,
   children,
+  description,
 }: BreadCrumbHeaderProps) {
   return (
     <nav
@@ -83,11 +84,14 @@ export function BreadCrumbPageHeader({
         className,
       )}
     >
-      <Breadcrumbs className="flex-wrap">
-        {items.map((item) => (
-          <HeaderItemComponent key={item.to} {...item} />
-        ))}
-      </Breadcrumbs>
+      <div className="flex flex-col gap-2">
+        {!!description && <Description>{description}</Description>}
+        <Breadcrumbs className="flex-wrap">
+          {items.map((item) => (
+            <HeaderItemComponent key={item.to} {...item} />
+          ))}
+        </Breadcrumbs>
+      </div>
       <div className="grow" />
       {children}
     </nav>

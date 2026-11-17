@@ -1,6 +1,7 @@
 import {
   IconCloud,
   IconDeviceLaptop,
+  IconFolder,
   IconHome,
   type ReactNode,
 } from "@tabler/icons-react";
@@ -27,6 +28,8 @@ export function ProjectLayout({
   const { project_id } = useParams<{ project_id: string }>();
   const result = useProjectQuery(project_id || "");
 
+  const path = result.data?.path?.short_path;
+
   return (
     <main className="content container mx-auto">
       <Shimmer
@@ -44,6 +47,14 @@ export function ProjectLayout({
             },
             ...links,
           ]}
+          description={
+            !!path && (
+              <div className="flex items-center gap-1 font-mono font-semibold text-muted">
+                <IconFolder className="size-4" />
+                {path}
+              </div>
+            )
+          }
         >
           {!!result.data && actions}
         </BreadCrumbPageHeader>
