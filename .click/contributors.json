@@ -1,0 +1,15 @@
+[
+  {
+    "id": "01a1e76f-eb1f-719f-aafd-5db535bc5418",
+    "name": "me@billcountry.tech - iCloud Keychain",
+    "user_id": "01a1e4ca-7533-745b-a498-cd308276ee59",
+    "cred_id": "4---ig6yp1-I-OCUB5kz14yoMeM",
+    "access": "Granted",
+    "user_salt": "xTVquF5y9J-uwRmxPxg5rn1aIMKfMQjT_4JCCbVF794",
+    "passkey_salt": "oUkCn4d7PjBzLldOAqdhSNCO2FhrpLq_qtR1t9n0SJI",
+    "public_key": "e0A6WzkJJGz0RoGqutAWhO1uP0zVCmKjMH8j_yzWcFg",
+    "contributor_id": "01a1e76f-eb1f-719f-aafd-5db49aa3ad47",
+    "granted_by": "me@billcountry.tech",
+    "granted_on": "2026-11-17T02:57:14.015236Z"
+  }
+]

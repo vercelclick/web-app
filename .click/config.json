@@ -1,0 +1,54 @@
+{
+  "project": {
+    "id": "01a1e76f-eb1e-7320-bcb6-fcd057a4919e",
+    "name": "Click Web App",
+    "description": "",
+    "updated_at": "2026-11-17T02:57:14.015213Z"
+  },
+  "environments": [
+    {
+      "name": "development",
+      "project_id": "01a1e76f-eb1e-7320-bcb6-fcd057a4919e",
+      "description": "For testing by developers before moving to QC",
+      "tags": [],
+      "updated_at": "2026-11-17T02:57:14.015216Z",
+      "created_at": "2026-11-17T02:57:14.015216Z"
+    },
+    {
+      "name": "staging",
+      "project_id": "01a1e76f-eb1e-7320-bcb6-fcd057a4919e",
+      "description": "For testing by QAs before promoting to production",
+      "tags": [],
+      "updated_at": "2026-11-17T02:57:14.015217Z",
+      "created_at": "2026-11-17T02:57:14.015217Z"
+    },
+    {
+      "name": "production",
+      "project_id": "01a1e76f-eb1e-7320-bcb6-fcd057a4919e",
+      "description": "Prod secrets, heavily restricted",
+      "tags": [],
+      "updated_at": "2026-11-17T02:57:14.015217Z",
+      "created_at": "2026-11-17T02:57:14.015217Z"
+    }
+  ],
+  "contributors": [
+    [
+      {
+        "id": "01a1e4ca-7533-745b-a498-cd308276ee59",
+        "email": "me@billcountry.tech",
+        "name": "Billcountry Mwaniki",
+        "key_salt": "xTVquF5y9J-uwRmxPxg5rn1aIMKfMQjT_4JCCbVF794",
+        "updated_at": "2026-11-16T14:38:19.460156Z"
+      },
+      {
+        "id": "01a1e76f-eb1f-719f-aafd-5db49aa3ad47",
+        "user_id": "01a1e4ca-7533-745b-a498-cd308276ee59",
+        "status": "Active",
+        "project_id": "01a1e76f-eb1e-7320-bcb6-fcd057a4919e",
+        "role": "Admin",
+        "access": [],
+        "updated_at": "2026-11-17T02:57:14.015222Z"
+      }
+    ]
+  ]
+}

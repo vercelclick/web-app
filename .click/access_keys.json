@@ -1,0 +1,20 @@
+[
+  {
+    "id": "717e5f66-6468-5ac6-80e2-544883fb9545",
+    "name": "GITHUB_ACTIONS_DEPLOYMENT",
+    "description": "Secrets needed while deploying webapp on github actions",
+    "project_id": "01a1e76f-eb1e-7320-bcb6-fcd057a4919e",
+    "access": [
+      {
+        "name": "production",
+        "level": "ReadOnly",
+        "secrets": [
+          "$ALL$"
+        ]
+      }
+    ],
+    "public_key": "M_YkhcRktHdJ8EGOjb3IOVVwWieIL_TScHKms7xrOzY",
+    "generated_by": "me@billcountry.tech",
+    "generated_on": "2026-11-17T02:59:09.555368Z"
+  }
+]

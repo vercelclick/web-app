@@ -21,13 +21,19 @@ jobs:
         with:
           path: web-app
 
+      - name: Install Click cli
+        run: curl --proto '=https' --tlsv1.2 -LsSf https://github.com/vercelclick/cli/releases/download/0.2.6/click-cli-installer.sh | sh
+
+      - name: Export secrets to github env
+        run: click export --access-key ${{ secrets.CLICK_ACCESS_TOKEN }} --env production >> $GITHUB_ENV
+
       - name: Checkout Core
         uses: actions/checkout@v7
         with:
           path: core
           ref: "${{ github.ref_name }}"
           repository: vercelclick/core
-          token: "${{ secrets.CORE_ACCESS_TOKEN }}"
+          token: "${{ env.CORE_ACCESS_TOKEN }}"
 
       - name: Setup rust toolchain
         uses: actions-rust-lang/setup-rust-toolchain@v2
@@ -52,6 +58,3 @@ jobs:
 
       - name: Publish to Cloudflare pages
         run: bunx wrangler deploy --tag=${{ github.ref_name }}
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
