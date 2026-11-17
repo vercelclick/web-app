@@ -2,7 +2,7 @@ import { ABORT_ERROR } from "@/components/error";
 import { CLOUD_API_BASE_URL, CONNECTION_REFUSED_ERR } from "@/constants";
 import { getSession } from "./session";
 
-export type RequestParameters = RequestInit & { base_url?: string };
+export type RequestParameters = RequestInit & { base_url: string };
 
 export async function makeApiRequest<T = unknown>(
   path: string,

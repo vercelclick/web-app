@@ -12,6 +12,7 @@ export function useCloudProjectsListQuery() {
         signal: context.signal,
         base_url: CLOUD_API_BASE_URL,
       }),
+    retryDelay: 250,
   });
 }
 
@@ -23,6 +24,7 @@ export function useLocalProjectsListQuery() {
         signal: context.signal,
         base_url: LOCAL_API_BASE_URL,
       }),
+    retryDelay: 250,
   });
 }
 

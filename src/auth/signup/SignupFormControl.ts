@@ -5,6 +5,7 @@ import * as uuid from "uuid";
 import * as z from "zod";
 import type { ErrorHook } from "@/components/error";
 import { sendEmailChallenge } from "@/components/otp";
+import { CLOUD_API_BASE_URL } from "@/constants";
 import {
   type AuthTokenResponse,
   create_passkey,
@@ -149,6 +150,7 @@ export function useSignupForm(error: ErrorHook) {
               public_key: pubkey_op.result.public_key,
               auth_result: pubkey_op.result.auth_result,
             } satisfies SignupRequest),
+            base_url: CLOUD_API_BASE_URL,
           }),
         {
           capture: "signup_complete",

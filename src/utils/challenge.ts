@@ -23,6 +23,7 @@ export async function generatePasskeyCreateChallenge(): Promise<WebauthnChalleng
 
   return resolveApiRequest<WebauthnChallengeResponse>(path, {
     method: "POST",
+    base_url: CLOUD_API_BASE_URL,
   });
 }
 
@@ -31,6 +32,7 @@ export async function generatePasskeySignInChallenge(): Promise<WebauthnChalleng
 
   return resolveApiRequest<WebauthnChallengeAnonymousResponse>(path, {
     method: "POST",
+    base_url: CLOUD_API_BASE_URL,
   });
 }
 
@@ -44,5 +46,6 @@ export async function generatePasskeySignupChallenge(
     body: JSON.stringify({
       owner: email,
     } satisfies SignupChallengeRequest),
+    base_url: CLOUD_API_BASE_URL,
   });
 }

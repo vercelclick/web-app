@@ -14,6 +14,7 @@ import * as z from "zod";
 import { useSession } from "@/auth";
 import { ErrorDisplay, useError } from "@/components";
 import { ConfirmationCodeInput, sendEmailChallenge } from "@/components/otp";
+import { CLOUD_API_BASE_URL } from "@/constants";
 import {
   type AuthTokenResponse,
   type CreatePasskeyRequest,
@@ -122,6 +123,7 @@ export function CreatePasskeyButton(props: ButtonProps) {
             public_key: pubkey_op.result.public_key,
             auth_result: pubkey_op.result.auth_result,
           } satisfies CreatePasskeyRequest),
+          base_url: CLOUD_API_BASE_URL,
         }),
       );
 

@@ -24,7 +24,11 @@ import { type ReactNode, useCallback, useState } from "react";
 import { useDecryptionParams } from "@/auth/useAuthorization";
 import { Alert, ErrorDisplay, Select, useError } from "@/components";
 import { SimpleMono } from "@/components/command";
-import { ENVIRONMENT_ALL_ACCESS } from "@/constants";
+import {
+  CLOUD_API_BASE_URL,
+  ENVIRONMENT_ALL_ACCESS,
+  LOCAL_API_BASE_URL,
+} from "@/constants";
 import {
   type ContributorPublicKey,
   type CreateAccessKeyRequest,
@@ -81,6 +85,11 @@ export function CreateAccessKeyDialog({ project_id }: CreateMachineKeyProps) {
           environments.map((env_name) =>
             resolveApiRequest<GetEnvironmentResult>(
               `/api/v1/projects/${project_id}/env/${env_name}`,
+              {
+                base_url: project_query.data?.path
+                  ? LOCAL_API_BASE_URL
+                  : CLOUD_API_BASE_URL,
+              },
             ),
           ),
         ),
@@ -130,6 +139,9 @@ export function CreateAccessKeyDialog({ project_id }: CreateMachineKeyProps) {
           encrypted_values: generate_op.result.encrypted_values,
           public_key: generate_op.result.public_key.value,
         } satisfies CreateAccessKeyRequest),
+        base_url: project_query?.data?.path
+          ? LOCAL_API_BASE_URL
+          : CLOUD_API_BASE_URL,
       }),
     );
 

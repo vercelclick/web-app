@@ -1,5 +1,10 @@
 import { Button, Modal } from "@heroui/react";
-import { IconFingerprint, IconTerminal2 } from "@tabler/icons-react";
+import {
+  IconCloud,
+  IconDeviceLaptop,
+  IconFingerprint,
+  IconTerminal2,
+} from "@tabler/icons-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import clsx from "clsx";
 import { useCallback, useMemo, useState } from "react";
@@ -37,7 +42,7 @@ export function RunnerDialog() {
   const [injected, setInjected] = useState(false);
 
   const details_query = useQuery({
-    queryKey: ["command-details"],
+    queryKey: ["command-details", { port }],
     queryFn: async (): Promise<EncryptionDetails> => {
       const response = await fetch(
         `https://${LOCAL_API_ORIGIN}:${port}/details`,
@@ -202,6 +207,8 @@ export function RunnerDialog() {
                       onChange={setProjectId}
                       placeholder="Select Project..."
                       items={projects.projects.map((project) => ({
+                        Icon:
+                          project.path === null ? IconCloud : IconDeviceLaptop,
                         label: project.project.name,
                         value: project.project.id,
                       }))}
@@ -231,7 +238,7 @@ export function RunnerDialog() {
 
               <Shimmer
                 active={project.isEnabled && project.isPending}
-                hidden={!project.isEnabled || !projects.error}
+                hidden={!project.isEnabled || !!projects.error}
                 className="h-6"
               >
                 {project.isSuccess && (
@@ -383,7 +390,7 @@ export function RunnerDialog() {
                   onClick={injectSecrets}
                 >
                   <IconFingerprint className="size-5" />
-                  Inject Secrets
+                  Inject {environment.data?.secrets?.length || ""} Secrets
                 </Button>
               )}
             </Modal.Footer>

@@ -8,6 +8,7 @@ import {
 } from "@heroui/react";
 import clsx from "clsx";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { CLOUD_API_BASE_URL } from "@/constants";
 import type {
   CheckChallengeRequest,
   CheckChallengeResult,
@@ -32,6 +33,7 @@ export async function sendEmailChallenge(
       name: options?.name,
       operation: options?.operation,
     } satisfies EmailChallengeRequest),
+    base_url: CLOUD_API_BASE_URL,
   });
 }
 
@@ -100,6 +102,7 @@ export function ConfirmationCodeInput({
             owner,
             value,
           } satisfies CheckChallengeRequest),
+          base_url: CLOUD_API_BASE_URL,
         },
       ),
     );

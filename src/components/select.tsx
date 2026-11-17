@@ -4,9 +4,11 @@ import {
   Label,
   ListBox,
 } from "@heroui/react";
+import type { TablerIcon } from "@tabler/icons-react";
 import type { ReactNode } from "react";
 
 export interface SelectItem {
+  Icon?: TablerIcon;
   value: string;
   label: string;
 }
@@ -51,7 +53,7 @@ export function Select<T extends string | string[]>({
     >
       <Label>{label}</Label>
       <HeroSelect.Trigger>
-        <HeroSelect.Value />
+        <HeroSelect.Value className="flex items-center gap-2" />
         <HeroSelect.Indicator />
       </HeroSelect.Trigger>
       <Description>{description}</Description>
@@ -63,6 +65,7 @@ export function Select<T extends string | string[]>({
               id={item.value}
               textValue={item.value}
             >
+              {item.Icon && <item.Icon className="size-5 inline" />}
               {item.label}
               <ListBox.ItemIndicator />
             </ListBox.Item>

@@ -15,6 +15,7 @@ import * as z from "zod";
 import { ErrorDisplay, useError } from "@/components";
 import { LoadingIcon } from "@/components/loader";
 import { ConfirmationCodeInput, sendEmailChallenge } from "@/components/otp";
+import { CLOUD_API_BASE_URL } from "@/constants";
 import {
   type AuthTokenResponse,
   authorize_operation,
@@ -65,6 +66,7 @@ export function SignInForm() {
             owner: challenge_op.result.owner,
             auth_response: auth_result.result,
           } satisfies PasskeySignInRequest),
+          base_url: CLOUD_API_BASE_URL,
         }),
     );
 
@@ -94,6 +96,7 @@ export function SignInForm() {
                 email_address,
                 confirmation_code,
               } satisfies EmailSignInRequest),
+              base_url: CLOUD_API_BASE_URL,
             }),
         );
 
