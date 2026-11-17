@@ -1,4 +1,9 @@
 import { Card, Tabs } from "@heroui/react";
+import {
+  IconArrowUpRight,
+  IconFingerprint,
+  IconShieldLock,
+} from "@tabler/icons-react";
 import { Activity, useState } from "react";
 import { Alert } from "@/components/alert";
 import { SignInForm } from "./SignIn";
@@ -13,67 +18,133 @@ export function AuthDashboard() {
   const [view, setView] = useState<ActiveView>(ActiveView.SignIn);
 
   return (
-    <div className="content flex flex-col items-center gap-8">
-      <div className="h-[10%]" />
-      <Card className="w-full max-w-3xl px-8 py-6">
-        <Card.Header>
-          <Card.Title className="text-xl font-light mb-4">
-            Sign in or Create account
-          </Card.Title>
-          <Tabs
-            className="w-full"
-            variant="secondary"
-            selectedKey={view}
-            onSelectionChange={(key) => setView(key as ActiveView)}
-          >
-            <Tabs.ListContainer>
-              <Tabs.List>
-                <Tabs.Tab id={ActiveView.SignIn}>
-                  <Tabs.Indicator />
-                  Sign in
-                </Tabs.Tab>
-                <Tabs.Tab id={ActiveView.Signup}>
-                  <Tabs.Indicator />
-                  Create Account
-                </Tabs.Tab>
-              </Tabs.List>
-            </Tabs.ListContainer>
-          </Tabs>
-        </Card.Header>
+    <main className="content relative isolate flex flex-col items-center justify-center overflow-hidden px-4 py-10 sm:py-14">
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 -z-10 overflow-hidden"
+      >
+        <div className="absolute -top-40 left-1/2 size-[34rem] -translate-x-1/2 rounded-full bg-emerald-400/10 blur-3xl" />
+        <div className="absolute top-1/3 -left-40 size-96 rounded-full bg-cyan-400/10 blur-3xl" />
+      </div>
+      <div className="w-full max-w-5xl">
+        <a
+          href="https://vercel.click"
+          className="mb-6 inline-flex items-center gap-2 text-sm font-medium text-muted transition-colors hover:text-foreground"
+        >
+          <span aria-hidden="true">←</span> Back to Vercel Click
+        </a>
+        <Card className="w-full overflow-hidden rounded-3xl border border-border/70 bg-surface/85 shadow-2xl shadow-emerald-950/10 backdrop-blur-xl">
+          <div className="grid md:grid-cols-[0.9fr_1.1fr]">
+            <section className="relative flex flex-col justify-between overflow-hidden bg-gradient-to-br from-emerald-500/10 via-teal-400/5 to-cyan-500/10 p-7 sm:p-10 md:border-r md:border-border/70">
+              <div
+                aria-hidden="true"
+                className="absolute -right-20 -top-16 size-64 rounded-full border border-emerald-500/10"
+              />
+              <div>
+                <div className="mb-8 flex size-14 items-center justify-center rounded-2xl border border-emerald-500/20 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                  <IconFingerprint className="size-8" stroke={1.6} />
+                </div>
+                <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700 dark:text-emerald-400">
+                  Your keys. Your secrets.
+                </p>
+                <h1 className="max-w-sm text-3xl font-semibold leading-tight tracking-tight sm:text-4xl">
+                  Pick up where your trust begins.
+                </h1>
+                <p className="mt-4 max-w-sm text-sm leading-6 text-muted sm:text-base">
+                  Your passkey unlocks the vault. Your secrets stay encrypted on
+                  your device, always beyond our reach.
+                </p>
+              </div>
+              <div className="mt-10 flex items-center gap-3 rounded-2xl border border-border/70 bg-background/50 p-4">
+                <IconShieldLock className="size-5 shrink-0 text-emerald-600 dark:text-emerald-400" />
+                <p className="text-xs leading-5 text-muted">
+                  Zero-knowledge by design{" "}
+                  <span className="text-foreground">·</span> Locked behind your
+                  fingerprint
+                </p>
+              </div>
+            </section>
 
-        <Card.Content className="mt-6">
-          <Activity mode={view === ActiveView.SignIn ? "visible" : "hidden"}>
-            <SignInForm />
-          </Activity>
-          <Activity mode={view === ActiveView.Signup ? "visible" : "hidden"}>
-            <SignupForm />
-          </Activity>
-        </Card.Content>
-        {view === ActiveView.SignIn && (
-          <Card.Footer className="mt-4">
-            <Alert
-              status="warning"
-              title="Email sign in limitations"
-              className="max-w-3xl bg-background shadow-none flex gap-2 text-sm"
-            >
-              <ul className="list-disc list-inside">
-                <li>
-                  If you sign in with your email, you'll still need your passkey
-                  to view secrets.
-                </li>
-                <li>
-                  If this is a new device, you can create a new passkey after
-                  signing in.
-                </li>
-                <li>
-                  The new passkey must be granted access on each project for it
-                  to access secrets.
-                </li>
-              </ul>
-            </Alert>
-          </Card.Footer>
-        )}
-      </Card>
-    </div>
+            <div className="px-6 py-7 sm:px-10 sm:py-9">
+              <Card.Header>
+                <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-muted">
+                  <span className="size-2 rounded-full bg-emerald-500 shadow-[0_0_12px] shadow-emerald-500/60" />
+                  Welcome to your vault
+                </div>
+                <Card.Title className="mb-4 text-2xl font-semibold tracking-tight">
+                  Sign in or create account
+                </Card.Title>
+                <Tabs
+                  className="w-full"
+                  variant="secondary"
+                  selectedKey={view}
+                  onSelectionChange={(key) => setView(key as ActiveView)}
+                >
+                  <Tabs.ListContainer>
+                    <Tabs.List>
+                      <Tabs.Tab id={ActiveView.SignIn}>
+                        <Tabs.Indicator />
+                        Sign in
+                      </Tabs.Tab>
+                      <Tabs.Tab id={ActiveView.Signup}>
+                        <Tabs.Indicator />
+                        Create Account
+                      </Tabs.Tab>
+                    </Tabs.List>
+                  </Tabs.ListContainer>
+                </Tabs>
+              </Card.Header>
+
+              <Card.Content className="mt-6">
+                <Activity
+                  mode={view === ActiveView.SignIn ? "visible" : "hidden"}
+                >
+                  <SignInForm />
+                </Activity>
+                <Activity
+                  mode={view === ActiveView.Signup ? "visible" : "hidden"}
+                >
+                  <SignupForm />
+                </Activity>
+              </Card.Content>
+              {view === ActiveView.SignIn && (
+                <Card.Footer className="mt-4">
+                  <Alert
+                    status="warning"
+                    title="Email sign in limitations"
+                    className="flex max-w-3xl gap-2 bg-background text-sm shadow-none"
+                  >
+                    <ul className="list-inside list-disc">
+                      <li>
+                        If you sign in with your email, you'll still need your
+                        passkey to view secrets.
+                      </li>
+                      <li>
+                        If this is a new device, you can create a new passkey
+                        after signing in.
+                      </li>
+                      <li>
+                        The new passkey must be granted access on each project
+                        for it to access secrets.
+                      </li>
+                    </ul>
+                  </Alert>
+                </Card.Footer>
+              )}
+              <p className="mt-6 text-center text-xs text-muted">
+                New to Click?{" "}
+                <a
+                  href="https://vercel.click"
+                  className="inline-flex items-center gap-1 font-medium text-emerald-700 hover:underline dark:text-emerald-400"
+                >
+                  See what makes your vault yours
+                  <IconArrowUpRight className="size-3.5" />
+                </a>
+              </p>
+            </div>
+          </div>
+        </Card>
+      </div>
+    </main>
   );
 }
