@@ -21,7 +21,7 @@ export function PageHeader({
   return (
     <div
       className={clsx(
-        "flex items-end mt-8 mb-4 border-b gap-4 py-2",
+        "flex items-end mt-8 mb-4 border-b gap-4 py-2 z-30",
         className,
       )}
     >

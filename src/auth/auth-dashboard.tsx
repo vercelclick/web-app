@@ -1,7 +1,8 @@
-import { Card } from "@heroui/react";
+import { Card, Typography } from "@heroui/react";
 import {
   IconArrowUpRight,
   IconFingerprint,
+  IconInfoCircle,
   IconShieldLock,
 } from "@tabler/icons-react";
 import { useState } from "react";
@@ -90,26 +91,25 @@ export function AuthDashboard() {
               </Card.Content>
               {signup_email === null && (
                 <Card.Footer className="mt-4">
-                  <Alert
-                    status="warning"
-                    title="Email sign in limitations"
-                    className="flex max-w-3xl gap-2 bg-background text-sm shadow-none"
-                  >
-                    <ul className="list-inside list-disc">
+                  <div className="max-w-3xl rounded-xl px-4 py-4 gap-2 bg-background text-sm shadow-none">
+                    <Typography type="h6" className="mb-2">
+                      A helpful note about email sign-in
+                    </Typography>
+                    <ul className="list-outside list-disc ml-4 text-sm text-muted">
                       <li>
-                        If you sign in with your email, you'll still need your
-                        passkey to view secrets.
+                        Email gets you into your account. Your passkey unlocks
+                        your secrets.
                       </li>
                       <li>
-                        If this is a new device, you can create a new passkey
-                        after signing in.
+                        On a new device? Sign in with email, then create a
+                        passkey for it.
                       </li>
                       <li>
-                        The new passkey must be granted access on each project
-                        for it to access secrets.
+                        Ask a project admin to grant your new passkey access to
+                        each project you need.
                       </li>
                     </ul>
-                  </Alert>
+                  </div>
                 </Card.Footer>
               )}
               <p className="mt-6 text-center text-xs text-muted">
