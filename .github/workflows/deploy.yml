@@ -55,12 +55,7 @@ jobs:
           NODE_ENV: production
 
       - name: Prepare Vercel static output
-        run: |
-          mkdir -p .vercel/output/static
-          cp -R dist/. .vercel/output/static/
-          printf '{"version":3,"routes":[{"handle":"filesystem"},{"src":"/.*","dest":"/index.html"}]}\n' > .vercel/output/config.json
-          mkdir -p .vercel
-          printf '{"orgId":"%s","projectId":"%s"}\n' "$VERCEL_ORG_ID" "$VERCEL_PROJECT_ID" > .vercel/project.json
+        run: make bundle-vercel
 
       - name: Publish to Vercel
         run: bunx vercel@latest deploy --prebuilt --prod --token="$VERCEL_TOKEN"

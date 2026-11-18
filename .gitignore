@@ -31,3 +31,5 @@ src/core
 
 # Local vault during development
 /.click-dev
+
+.vercel
