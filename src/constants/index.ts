@@ -32,6 +32,5 @@ export const CLOUD_API_BASE_URL =
   import.meta.env.VITE_CLOUD_API_BASE_URL ?? "http://localhost:8080";
 
 export const CONNECTION_REFUSED_ERR = "CONNECTION_REFUSED";
-export const APP_VERSION = import.meta.env.VITE_APP_VERSION ?? "0.2.1";
 
 export const ENVIRONMENT_ALL_ACCESS = "$ALL$";

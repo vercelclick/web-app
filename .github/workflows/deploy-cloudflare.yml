@@ -1,4 +1,4 @@
-name: Deploy to Cloudflare Pages
+name: Deploy to Vercel
 
 on:
   push:
@@ -10,7 +10,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      deployments: write
     defaults:
       run:
         working-directory: web-app
@@ -22,7 +21,7 @@ jobs:
           path: web-app
 
       - name: Install Click cli
-        run: curl --proto '=https' --tlsv1.2 -LsSf https://github.com/vercelclick/cli/releases/download/0.2.7/click-cli-installer.sh | sh
+        run: curl -LsSf https://github.com/vercelclick/cli/releases/latest/download/click-cli-installer.sh | sh
 
       - name: Export secrets to github env
         run: click export --access-key ${{ secrets.CLICK_ACCESS_TOKEN }} --env production --format github-actions >> $GITHUB_ENV
@@ -54,7 +53,14 @@ jobs:
         run: make build-prod
         env:
           NODE_ENV: production
-          VITE_APP_VERSION: ${{ github.ref_name }}
 
-      - name: Publish to Cloudflare pages
-        run: bunx wrangler deploy --tag=${{ github.ref_name }}
+      - name: Prepare Vercel static output
+        run: |
+          mkdir -p .vercel/output/static
+          cp -R dist/. .vercel/output/static/
+          printf '{"version":3,"routes":[{"handle":"filesystem"},{"src":"/.*","dest":"/index.html"}]}\n' > .vercel/output/config.json
+          mkdir -p .vercel
+          printf '{"orgId":"%s","projectId":"%s"}\n' "$VERCEL_ORG_ID" "$VERCEL_PROJECT_ID" > .vercel/project.json
+
+      - name: Publish to Vercel
+        run: bunx vercel@latest deploy --prebuilt --prod --token="$VERCEL_TOKEN"
