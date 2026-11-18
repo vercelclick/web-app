@@ -93,15 +93,23 @@ export function HomeDashboard() {
         <InaccessibleProjectsList projects={inaccessible} />
       </Shimmer>
 
-      <div className="my-8">
-        <div className="flex gap-8 mb-6 items-center">
+      <section className="my-10" aria-labelledby="home-help-title">
+        <div className="mb-3 flex items-center gap-6">
           <Separator className="flex-1" />
-          <div className="text-muted">Missing something?</div>
+          <h2
+            id="home-help-title"
+            className="text-center text-lg font-semibold tracking-tight"
+          >
+            Need a hand with your vault?
+          </h2>
           <Separator className="flex-1" />
         </div>
-
+        <p className="mx-auto mb-6 max-w-xl text-center text-sm leading-6 text-muted">
+          Connect a project, finish setup, or check your account access. Your
+          passkey keeps your secrets yours.
+        </p>
         <HelpTopicList />
-      </div>
+      </section>
 
       <RunnerDialog />
     </div>

@@ -1,9 +1,7 @@
 import {
-  IconBook,
   IconBook2,
   IconBrandDiscord,
   IconBrandGithub,
-  IconBrandMedium,
   IconBrandSlack,
   IconBrandX,
 } from "@tabler/icons-react";
@@ -44,22 +42,8 @@ export const RESOURCES_LINKS: DropdownItemProps[] = [
   {
     label: "Docs",
     Icon: IconBook2,
-    href: "https://vercel.click/l/docs",
+    href: "https://vercel.click/docs",
     capture: "resource-interest-docs",
-    is_external: true,
-  },
-  {
-    label: "Blog",
-    Icon: IconBrandMedium,
-    href: "https://vercel.click/l/blog",
-    capture: "resource-interest-blog",
-    is_external: true,
-  },
-  {
-    label: "Knowledge Base",
-    Icon: IconBook,
-    href: "https://vercel.click/l/kb",
-    capture: "resource-interest-kb",
     is_external: true,
   },
 ];

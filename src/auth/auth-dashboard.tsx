@@ -2,11 +2,9 @@ import { Card, Typography } from "@heroui/react";
 import {
   IconArrowUpRight,
   IconFingerprint,
-  IconInfoCircle,
   IconShieldLock,
 } from "@tabler/icons-react";
 import { useState } from "react";
-import { Alert } from "@/components/alert";
 import { SignInForm } from "./SignIn";
 import { SignupForm } from "./signup";
 

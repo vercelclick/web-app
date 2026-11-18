@@ -1,11 +1,12 @@
-import { Dropdown, IconChevronDown } from "@heroui/react";
-import { IconVault } from "@tabler/icons-react";
+import { buttonVariants, Dropdown, IconChevronDown } from "@heroui/react";
+import { IconExternalLink, IconVault } from "@tabler/icons-react";
+import clsx from "clsx";
 import type { ReactNode } from "react";
 import { Link } from "react-router";
 import { useRawSession } from "@/auth";
 import { DropdownItem, type DropdownItemProps } from "@/components";
 import { ThemeToggle } from "@/shared/theme/theme-toggle";
-import { COMMUNITY_LINKS, RESOURCES_LINKS } from "./links";
+import { COMMUNITY_LINKS } from "./links";
 import { UserProfileButton } from "./profile";
 
 export function Navbar() {
@@ -22,23 +23,30 @@ export function Navbar() {
             <IconVault className="size-7 text-accent" />
           </Link>
 
-          {session === null && (
-            <nav className="hidden md:flex items-center gap-3">
+          <nav className="flex items-center gap-1 md:gap-2 xl:gap-3">
+            {session === null && (
               <LinkDropDown items={COMMUNITY_LINKS} label="Community" />
-              <LinkDropDown items={RESOURCES_LINKS} label="Resources" />
+            )}
 
-              <div className="flex items-center gap-4 border-l pl-4">
-                <ThemeToggle />
-              </div>
-            </nav>
-          )}
+            <a
+              className={clsx(
+                buttonVariants.base,
+                buttonVariants.variants.variant.ghost,
+                "hidden md:flex",
+              )}
+              target="_blank"
+              rel="noreferrer"
+              href="https://vercel.click/docs"
+            >
+              Docs <IconExternalLink className="size-4" />
+            </a>
 
-          {session !== null && (
-            <div className="flex items-center gap-1 md:gap-2">
+            <div className="flex items-center gap-4 md:border-l pl-4">
               <ThemeToggle />
-              <UserProfileButton user={session.user} />
+
+              {session !== null && <UserProfileButton user={session.user} />}
             </div>
-          )}
+          </nav>
         </div>
       </header>
     </nav>

@@ -9,34 +9,44 @@ interface HelpTopicItem {
 
 const HELP_TOPICS: HelpTopicItem[] = [
   {
-    title: "Can't see your local project?",
+    title: "Connect a local project",
     details: (
       <div>
-        Please navigate to the project folder and run{" "}
-        <SimpleMono value="click attach" />. This will give local click vault
-        visibility into the project directory.
+        From your project folder, run <SimpleMono value="click attach" /> to
+        connect it to Click Vault. The vault can then manage its encrypted
+        secrets alongside your project.
       </div>
     ),
   },
   {
-    title: "Want to setup a new project?",
+    title: "Bring another project into your vault",
     details: (
       <div>
-        Please navigate to the target folder and run{" "}
-        <SimpleMono value="click attach" />. The project will appear under
-        pending projects and you can proceed to complete the set up.
+        From the folder you want to connect, run{" "}
+        <SimpleMono value="click attach" />. It will appear in Pending Projects
+        so you can finish setting it up.
       </div>
     ),
   },
   {
-    title: "Why is my project under pending projects?",
-    details:
-      "You attached the folder but the project setup is not completed, click on it under pending projects to complete setup.",
+    title: "Finish setting up a project",
+    details: (
+      <div>
+        Your folder is connected and ready for the last setup step. Select it
+        under Pending Projects to create its Click Vault project and start
+        managing secrets.
+      </div>
+    ),
   },
   {
-    title: "Why is my project under inaccessible projects?",
-    details:
-      "The project is attached to the local vault but you don't have access under the current user, sign in with the relevant user to access the project.",
+    title: "Can't open one of your projects?",
+    details: (
+      <div>
+        This project is connected to your local vault under a different Click
+        account. Sign in to the account that has access to the project, and
+        you'll be able to continue managing its secrets.
+      </div>
+    ),
   },
 ];
 
